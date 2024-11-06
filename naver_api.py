@@ -102,7 +102,7 @@ def main():
         start = jsonResponse['start'] + jsonResponse['display']
         jsonResponse = get_naver_search(node, src_text, start, 100)
 
-    # 멀티스레딩 본문 크롤링
+    # Multi Threading 본문 크롤링
     with ThreadPoolExecutor(max_workers=10) as executor:
         future_to_url = {executor.submit(get_news_content, post['link']): post for post in jsonResult}
         for future in as_completed(future_to_url):
