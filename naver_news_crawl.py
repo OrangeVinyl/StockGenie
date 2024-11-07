@@ -71,6 +71,7 @@ def get_news_content(link):
             if content:
                 return content.get_text(strip=True)
         return None
+
     except Exception as e:
         print(f"Error while crawling news content: {e}")
         return None
@@ -79,6 +80,7 @@ def get_news_content(link):
 def filter_post(post, keyword):
     title = post['title']
     link = post['link']
+
     if keyword.lower() in title.lower() and "n.news.naver.com" in link:
         return True
     return False
@@ -118,12 +120,12 @@ def main():
     print("================[총 검색 결과]================")
     print('전체 검색 : %d 건' % total)
 
-    with open('%s_naver_%s.json' % (src_text, node), 'w', encoding='utf8') as outfile:
+    with open('%s_naver_articles.json' % src_text, 'w', encoding='utf8') as outfile:
         retJson = json.dumps(jsonResult, indent=4, sort_keys=True, ensure_ascii=False)
         outfile.write(retJson)
 
     print("가져온 데이터 : %d 건" % cnt)
-    print('%s_naver_%s.json SAVED' % (src_text, node))
+    print('%s_naver_articles.json SAVED' % src_text)
 
 if __name__ == '__main__':
     main()
