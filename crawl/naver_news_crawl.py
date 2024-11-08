@@ -116,16 +116,25 @@ def main():
             except Exception as e:
                 print(f"Error processing post {post['cnt']}: {e}")
 
+    # 저장 디렉토리 경로 설정
+    save_dir = "../data/naver_articles"
+    if not os.path.exists(save_dir):
+        os.makedirs(save_dir)
+
+    # 파일 저장 경로 설정
+    save_path = os.path.join(save_dir, f'{src_text}_naver_articles.json')
+
 
     print("================[총 검색 결과]================")
     print('전체 검색 : %d 건' % total)
 
-    with open('%s_naver_articles.json' % src_text, 'w', encoding='utf8') as outfile:
+    with open(save_path, 'w', encoding='utf8') as outfile:
         retJson = json.dumps(jsonResult, indent=4, sort_keys=True, ensure_ascii=False)
         outfile.write(retJson)
 
     print("가져온 데이터 : %d 건" % cnt)
     print('%s_naver_articles.json SAVED' % src_text)
+    print(f'{save_path} SAVED')
 
 if __name__ == '__main__':
     main()
