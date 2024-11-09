@@ -50,7 +50,7 @@ def get_article_content(driver, link):
 def get_news_articles(company_name):
     results = []
     base_url = f"https://www.investing.com/search/?q={company_name}&tab=news"
-    driver = set_chrome_driver(False)
+    driver = set_chrome_driver(True)
     driver.get(base_url)
 
     WebDriverWait(driver, 15).until(
@@ -98,10 +98,6 @@ def get_news_articles(company_name):
 
     return results
 
-def main():
-    company_name = input('검색어를 입력하세요: ')
-    articles = get_news_articles(company_name)
-    print(articles)
-
-if __name__ == '__main__':
-    main()
+def main(company_name):
+    get_news_articles(company_name)
+    print("검색이 완료되었습니다.")

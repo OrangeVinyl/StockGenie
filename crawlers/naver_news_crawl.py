@@ -12,8 +12,6 @@ load_dotenv()
 client_id = os.getenv("NAVER_CLIENT")
 client_secret = os.getenv("NAVER_SECRET")
 
-
-# [MODULE 1] 기본 요청 처리 함수
 def get_request_url(url):
     req = urllib.request.Request(url)
     req.add_header("X-Naver-Client-Id", client_id)
@@ -31,7 +29,6 @@ def get_request_url(url):
         print(e)
         return None
 
-# [MODULE 2] 네이버 뉴스 검색 함수
 def get_naver_search(node, src_text, start, display):
     base = "https://openapi.naver.com/v1/search"
     node = "/" + node + ".json"
@@ -45,22 +42,19 @@ def get_naver_search(node, src_text, start, display):
     else:
         return json.loads(response_decode)
 
-
-# [MODULE 3] 필터링된 게시물 데이터를 가져오는 함수
-def get_post_data(post, jsonResult, cnt):
+def get_post_data(post, json_result, cnt):
     title = post['title']
     description = post['description']
     org_link = post['originallink']
     link = post['link']
 
-    pDate = datetime.datetime.strptime(post['pubDate'], '%a, %d %b %Y %H:%M:%S +0900')
-    pDate = pDate.strftime('%Y-%m-%d %H:%M:%S')
+    publish_date = datetime.datetime.strptime(post['pubDate'], '%a, %d %b %Y %H:%M:%S +0900')
+    publish_date = publish_date.strftime('%Y-%m-%d %H:%M:%S')
 
-    jsonResult.append({'cnt': cnt, 'title': title, 'description': description,
-                       'org_link': org_link, 'link': link, 'pDate': pDate})
+    json_result.append({'cnt': cnt, 'title': title, 'description': description,
+                       'org_link': org_link, 'link': link, 'publish_date': publish_date})
     return
 
-# [MODULE 4] 뉴스 본문을 가져오는 함수
 def get_news_content(link):
     try:
         headers = {'User-Agent': 'Mozilla/5.0'}
@@ -76,7 +70,6 @@ def get_news_content(link):
         print(f"Error while crawling news content: {e}")
         return None
 
-# [MODULE 5] 뉴스 데이터 필터링 함수 (도메인 검사)
 def filter_post(post, keyword):
     title = post['title']
     link = post['link']
@@ -86,27 +79,27 @@ def filter_post(post, keyword):
     return False
 
 
-def main():
+def run(c_name):
     node = 'news'
-    src_text = input('검색어를 입력하세요: ')
+    src_text = c_name
     cnt = 0
-    jsonResult = []
+    json_result = []
 
-    jsonResponse = get_naver_search(node, src_text, 1, 100)
-    total = jsonResponse['total']
+    json_response = get_naver_search(node, src_text, 1, 100)
+    total = json_response['total']
 
-    while (jsonResponse is not None) and (jsonResponse['display'] != 0):
-        for post in jsonResponse['items']:
+    while (json_response is not None) and (json_response['display'] != 0):
+        for post in json_response['items']:
             if filter_post(post, src_text):
                 cnt += 1
-                get_post_data(post, jsonResult, cnt)
+                get_post_data(post, json_result, cnt)
 
-        start = jsonResponse['start'] + jsonResponse['display']
-        jsonResponse = get_naver_search(node, src_text, start, 100)
+        start = json_response['start'] + json_response['display']
+        json_response = get_naver_search(node, src_text, start, 100)
 
-    # Multi Threading 본문 크롤링
+    # Multi Threading crawling
     with ThreadPoolExecutor(max_workers=10) as executor:
-        future_to_url = {executor.submit(get_news_content, post['link']): post for post in jsonResult}
+        future_to_url = {executor.submit(get_news_content, post['link']): post for post in json_result}
         for future in as_completed(future_to_url):
             post = future_to_url[future]
             try:
@@ -116,25 +109,22 @@ def main():
             except Exception as e:
                 print(f"Error processing post {post['cnt']}: {e}")
 
-    # 저장 디렉토리 경로 설정
-    save_dir = "../data/naver_articles"
+    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    save_dir = os.path.join(base_dir, 'data', 'naver_articles')
+
     if not os.path.exists(save_dir):
         os.makedirs(save_dir)
 
-    # 파일 저장 경로 설정
-    save_path = os.path.join(save_dir, f'{src_text}_naver_articles.json')
+    save_path = os.path.join(save_dir, f'{c_name}_naver_articles.json')
 
 
     print("================[총 검색 결과]================")
     print('전체 검색 : %d 건' % total)
 
     with open(save_path, 'w', encoding='utf8') as outfile:
-        retJson = json.dumps(jsonResult, indent=4, sort_keys=True, ensure_ascii=False)
-        outfile.write(retJson)
+        res = json.dumps(json_result, indent=4, sort_keys=True, ensure_ascii=False)
+        outfile.write(res)
 
     print("가져온 데이터 : %d 건" % cnt)
     print('%s_naver_articles.json SAVED' % src_text)
     print(f'{save_path} SAVED')
-
-if __name__ == '__main__':
-    main()
