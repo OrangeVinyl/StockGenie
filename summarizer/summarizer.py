@@ -1,5 +1,7 @@
 import os
 import json
+
+import logging
 from tqdm import tqdm
 from langchain_openai import ChatOpenAI
 from langchain.chains.summarize import load_summarize_chain
@@ -16,8 +18,10 @@ def load_articles(input_dir, company_name, source):
         file_pattern = f"{company_name}_naver_articles"
     elif source == 'investing':
         file_pattern = f"{company_name}_investing_articles"
+    elif source == 'news':
+        file_pattern = f"{company_name}_news_articles"
     else:
-        print("지원하지 않는 소스입니다.")
+        logging.warning("[WARN] 지원하지 않는 소스입니다.")
         return articles
 
     for filename in os.listdir(input_dir):
@@ -26,6 +30,7 @@ def load_articles(input_dir, company_name, source):
             with open(file_path, "r", encoding="utf-8") as f:
                 data = json.load(f)
                 articles.extend(data)
+
     return articles
 
 def save_articles(articles, output_dir, company_name, source):
@@ -37,9 +42,9 @@ def save_articles(articles, output_dir, company_name, source):
 
 def summarize_article(content, chain):
     if not content:
-        return "요약할 내용이 없습니다."
+        return "[WARN] 요약할 내용이 없습니다."
 
-    # 텍스트 분할
+    # Split Text
     text_splitter = RecursiveCharacterTextSplitter(
         chunk_size=1000,
         chunk_overlap=200
@@ -54,24 +59,23 @@ def summarize_article(content, chain):
 def run(input_dir, output_dir, company_name, source):
     from dotenv import load_dotenv
     load_dotenv()
-
-    set_llm_cache(InMemoryCache())
+    set_llm_cache(InMemoryCache()) #Cache
 
     os.environ["OPENAI_API_KEY"] = os.getenv("OPENAI_API_KEY")
 
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
 
-
+    ## LangChain - load_summarize_chain
     llm = ChatOpenAI(model="gpt-4o", temperature=0)
-    
     chain = load_summarize_chain(llm, chain_type="stuff", prompt=custom_prompt_template)
 
     articles = load_articles(input_dir, company_name, source)
     if not articles:
-        print("요약할 기사가 없습니다.")
+        logging.warning("[WARN] 요약할 기사가 없습니다.")
         return
 
+    ## tqdm Progress Bar
     for article in tqdm(articles, desc="기사 요약 중"):
         if 'summary' not in article or not article['summary']:
             content = article.get('content', '')

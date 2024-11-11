@@ -23,7 +23,7 @@ def get_request_url(url):
             print("[%s] Url Request Success" % datetime.datetime.now())
             return response.read().decode('utf-8')
     except Exception as e:
-
+        print()
         print("================[ END ]================")
         print("[%s] LAST URL : %s" % (datetime.datetime.now(), url))
         return None
@@ -31,12 +31,13 @@ def get_request_url(url):
 def get_naver_search(node, src_text, start, display):
     base = "https://openapi.naver.com/v1/search"
     node = "/" + node + ".json"
-    parameters = "?query=%s&start=%s&display=%s" % (urllib.parse.quote(src_text), start, display)
+
+    parameters = "?query=%s&start=%s&display=%s&sort=date" % (urllib.parse.quote(src_text), start, display)
 
     url = base + node + parameters
     response_decode = get_request_url(url)
 
-    if response_decode is None: ## 에러가 발생 할 수 있음
+    if response_decode is None:
         return None
     else:
         return json.loads(response_decode)
@@ -69,14 +70,33 @@ def get_news_content(link):
         print(f"Error while crawling news content: {e}")
         return None
 
-def filter_post(post, keyword):
+def filter_post(post, keyword, cutoff_date):
     title = post['title']
     link = post['link']
+    pub_date = datetime.datetime.strptime(post['pubDate'], '%a, %d %b %Y %H:%M:%S +0900')
 
-    if keyword.lower() in title.lower() and "n.news.naver.com" in link:
+    # 키워드 포함, 네이버 뉴스 링크, 최근 1주일 내 게시된 기사
+    if (keyword.lower() in title.lower() and
+        "n.news.naver.com" in link and
+        pub_date >= cutoff_date):
         return True
     return False
 
+def save_output(json_result, c_name):
+    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    save_dir = os.path.join(base_dir, 'data', 'naver_articles')
+
+    if not os.path.exists(save_dir):
+        os.makedirs(save_dir)
+
+    save_path = os.path.join(save_dir, f'{c_name}_naver_articles.json')
+
+    with open(save_path, 'w', encoding='utf8') as outfile:
+        res = json.dumps(json_result, indent=4, sort_keys=True, ensure_ascii=False)
+        outfile.write(res)
+
+    print('%s_naver_articles.json SAVED' % c_name)
+    print(f'{save_path} SAVED')
 
 def run(c_name):
     node = 'news'
@@ -84,19 +104,35 @@ def run(c_name):
     cnt = 0
     json_result = []
 
-    json_response = get_naver_search(node, src_text, 1, 100)
-    total = json_response['total']
+    today = datetime.datetime.now()
+    one_week_ago = today - datetime.timedelta(weeks=1)
 
-    while (json_response is not None) and (json_response['display'] != 0):
-        for post in json_response['items']:
-            if filter_post(post, src_text):
+    json_response = get_naver_search(node, src_text, 1, 100)
+    if json_response is None:
+        print("검색 결과를 가져오지 못했습니다.")
+        return
+
+    total = json_response.get('total', 0)
+
+    while (json_response is not None) and (json_response.get('display', 0) != 0):
+        for post in json_response.get('items', []):
+            if filter_post(post, src_text, one_week_ago):
                 cnt += 1
                 get_post_data(post, json_result, cnt)
+            else:
+                ## At least 1 week
+                pub_date = datetime.datetime.strptime(post['pubDate'], '%a, %d %b %Y %H:%M:%S +0900')
+                if pub_date < one_week_ago:
+                    print("1주일 이전의 기사를 만나 검색을 종료합니다.")
+                    break
+
+        if any(datetime.datetime.strptime(post['pubDate'], '%a, %d %b %Y %H:%M:%S +0900') < one_week_ago for post in json_response.get('items', [])):
+            break
 
         start = json_response['start'] + json_response['display']
         json_response = get_naver_search(node, src_text, start, 100)
 
-    # Multi Threading crawling
+    ## Multi Threading
     with ThreadPoolExecutor(max_workers=10) as executor:
         future_to_url = {executor.submit(get_news_content, post['link']): post for post in json_result}
         for future in as_completed(future_to_url):
@@ -108,22 +144,9 @@ def run(c_name):
             except Exception as e:
                 print(f"Error processing post {post['cnt']}: {e}")
 
-    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    save_dir = os.path.join(base_dir, 'data', 'naver_articles')
+    save_output(json_result, c_name)
 
-    if not os.path.exists(save_dir):
-        os.makedirs(save_dir)
-
-    save_path = os.path.join(save_dir, f'{c_name}_naver_articles.json')
-
-
-    print("================[총 검색 결과]================")
+    print("\n================[총 검색 결과]================")
     print('전체 검색 : %d 건' % total)
-
-    with open(save_path, 'w', encoding='utf8') as outfile:
-        res = json.dumps(json_result, indent=4, sort_keys=True, ensure_ascii=False)
-        outfile.write(res)
-
     print("가져온 데이터 : %d 건" % cnt)
-    print('%s_naver_articles.json SAVED' % src_text)
-    print(f'{save_path} SAVED')
+    print()

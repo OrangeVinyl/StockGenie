@@ -1,7 +1,7 @@
 import os
 import time
 import psutil
-from crawlers import naver_crawl, investing_crawl
+from crawlers import naver_crawl, investing_crawl, news_crawl
 from summarizer import summarizer
 
 def get_user_input():
@@ -11,15 +11,15 @@ def get_user_input():
 
 def crawl_articles(source, company_name):
     if source == '국내':
-        print("네이버 뉴스를 크롤링합니다...")
+        print("국내 뉴스를 크롤링합니다...")
         naver_crawl.run(company_name)
         input_dir = os.path.join("data", "naver_articles")
         crawl_source = 'naver'
     elif source == '해외':
-        print("Investing 뉴스를 크롤링합니다...")
-        investing_crawl.run(company_name)
-        input_dir = os.path.join("data", "investing_articles")
-        crawl_source = 'investing'
+        print("해외 뉴스를 크롤링합니다...")
+        news_crawl.run(company_name)
+        input_dir = os.path.join("data", "news_articles")
+        crawl_source = 'news'
     else:
         print("잘못된 소스입니다. '국내' 또는 '해외'를 입력해주세요.")
         return None, None, None
@@ -36,10 +36,10 @@ def measure_performance(start_cpu_times, start_wall, end_cpu_times, end_wall):
 
     wall_time = end_wall - start_wall
 
-    print()
-    print("======================================================================")
+    print("\n======================================================================")
     print(f"CPU times: user {user_time:.2f} s, sys {system_time:.2f} s, total: {total_cpu_time:.2f} s")
     print(f"Wall time: {wall_time:.2f} s")
+    print("======================================================================\n")
 
 def main():
     process = psutil.Process()
