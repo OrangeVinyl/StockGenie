@@ -26,7 +26,6 @@ def get_request_url(url):
 
         print("================[ END ]================")
         print("[%s] LAST URL : %s" % (datetime.datetime.now(), url))
-        print(e)
         return None
 
 def get_naver_search(node, src_text, start, display):

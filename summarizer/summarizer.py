@@ -1,10 +1,13 @@
 import os
 import json
 from tqdm import tqdm
-from langchain_community.chat_models import ChatOpenAI
+from langchain_openai import ChatOpenAI
 from langchain.chains.summarize import load_summarize_chain
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.docstore.document import Document
+from langchain.globals import set_llm_cache
+from langchain_community.cache import InMemoryCache
+from .prompts import custom_prompt_template
 
 def load_articles(input_dir, company_name, source):
     articles = []
@@ -43,26 +46,26 @@ def summarize_article(content, chain):
     )
     texts = text_splitter.split_text(content)
 
-    # Document 객체 생성
     docs = [Document(page_content=t) for t in texts]
 
-    # 요약 생성
     summary = chain.invoke({'input_documents': docs})['output_text']
     return summary.strip()
 
 def run(input_dir, output_dir, company_name, source):
     from dotenv import load_dotenv
     load_dotenv()
+
+    set_llm_cache(InMemoryCache())
+
     os.environ["OPENAI_API_KEY"] = os.getenv("OPENAI_API_KEY")
 
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
 
-    # 최신 방식으로 LLM 초기화
-    llm = ChatOpenAI(model_name='gpt-4o', temperature=0)
 
-    # 요약 체인 로드
-    chain = load_summarize_chain(llm, chain_type="stuff")
+    llm = ChatOpenAI(model="gpt-4o", temperature=0)
+    
+    chain = load_summarize_chain(llm, chain_type="stuff", prompt=custom_prompt_template)
 
     articles = load_articles(input_dir, company_name, source)
     if not articles:
