@@ -6,6 +6,12 @@ def load_stopwords(filepath):
     return stopwords
 
 def extract_relevant_words(text):
+    """
+    @description: 해당 텍스트에서 명사, 형용사, 부사 등의 품사만 추출하여 반환
+
+    :param text:
+    :return:
+    """
     mecab = Mecab(dicpath=r"C:\mecab\share\mecab-ko-dic")
     STOPWORDS = load_stopwords('../data/stopwords.txt')
 
