@@ -2,8 +2,8 @@ import torch
 import torch.nn.functional as F
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
 
-tokenizer = AutoTokenizer.from_pretrained("monologg/kobert", trust_remote_code=True)
-model = AutoModelForSequenceClassification.from_pretrained("monologg/kobert")
+tokenizer = AutoTokenizer.from_pretrained("kykim/bert-kor-base", trust_remote_code=True)
+model = AutoModelForSequenceClassification.from_pretrained("kykim/bert-kor-base")
 
 sentences = [
     "이곳에서 보낸 휴가는 정말 잊지 못할 만큼 행복하고 즐거웠다. 아름다운 풍경과 사람들의 따뜻한 환대가 더해져 모든 순간이 마법 같았다.",
@@ -14,10 +14,8 @@ sentences = [
 
 for sentence in sentences:
 
-    # 입력 데이터 준비
     inputs = tokenizer(sentence, return_tensors="pt")
     outputs = model(**inputs)
-
 
     logits = outputs.logits
 
