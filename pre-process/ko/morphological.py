@@ -13,7 +13,7 @@ def extract_relevant_words(text):
     :return:
     """
     mecab = Mecab(dicpath=r"C:\mecab\share\mecab-ko-dic")
-    STOPWORDS = load_stopwords('../data/stopwords.txt')
+    STOPWORDS = load_stopwords('../../data/stopwords.txt')
 
     morphs = mecab.pos(text)
 
