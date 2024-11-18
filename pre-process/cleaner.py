@@ -35,14 +35,22 @@ def clean_text(texts):
     :return: array of clean text
     """
     corpus = []
-    for i in range(0, len(texts)):
-        review = re.sub(r'[@%\\*=()/~#&\+á?\xc3\xa1\-\|\.\:\;\!\-\,\_\~\$\'\"]', '',str(texts[i])) # remove punctuation
-        review = re.sub(r'\d+','', str(texts[i])) # remove number
-        review = review.lower() #lower case
-        review = re.sub(r'\s+', ' ', review) # remove extra space
-        review = re.sub(r'<[^>]+>','',review) # remove Html tags
-        review = re.sub(r'\s+', ' ', review) # remove spaces
-        review = re.sub(r"^\s+", '', review) # remove space from start
-        review = re.sub(r'\s+$', '', review) # remove space from the end
-        corpus.append(review)
+    for text in texts:
+
+        lines = text.split('\n')
+        clean_lines = []
+
+        for line in lines:
+            review = clean_punc(line, punct, punct_mapping)  # 특수 문자 정제
+            review = re.sub(r'[@%\\*=()/~#&\+á?\xc3\xa1\-\|\:\;\!\-\,\_\~\$\'\"]', '', review)  # 구두점 제거
+            review = re.sub(r'\d+', '', review)  # 숫자 제거
+            review = review.lower()  # 소문자 변환
+            review = re.sub(r'\s+', ' ', review)  # 불필요한 공백 제거
+            review = re.sub(r'<[^>]+>', '', review)  # HTML 태그 제거
+            review = re.sub(r'^\s+', '', review)  # 문자열 시작 부분의 공백 제거
+            review = re.sub(r'\s+$', '', review)  # 문자열 끝 부분의 공백 제거
+            clean_lines.append(review)
+
+        # 정제된 줄들을 다시 개행 문자로 연결
+        corpus.append("\n".join(clean_lines))
     return corpus
