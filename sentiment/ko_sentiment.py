@@ -2,7 +2,7 @@ import torch
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
 import torch.nn.functional as F
 
-model_save_path = 'models/kobert_emotion_classifier'
+model_save_path = '../models/kobert_emotion_classifier'
 tokenizer = AutoTokenizer.from_pretrained(model_save_path)
 model = AutoModelForSequenceClassification.from_pretrained(model_save_path)
 

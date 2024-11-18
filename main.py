@@ -1,7 +1,7 @@
 import os
 import time
 import psutil
-from crawlers import naver_crawl, investing_crawl, news_crawl
+from crawlers import naver_crawl , news_crawl
 from summarizer import summarizer
 
 def get_user_input():

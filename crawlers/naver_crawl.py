@@ -20,12 +20,12 @@ def get_request_url(url):
     try:
         response = urllib.request.urlopen(req)
         if response.getcode() == 200:
-            print("[%s] Url Request Success" % datetime.datetime.now())
+            print("[SUCCESS] [%s] Url Request Success" % datetime.datetime.now())
             return response.read().decode('utf-8')
     except Exception as e:
         print()
         print("================[ END ]================")
-        print("[%s] LAST URL : %s" % (datetime.datetime.now(), url))
+        print("[INFO] [%s] LAST URL : %s" % (datetime.datetime.now(), url))
         return None
 
 def get_naver_search(node, src_text, start, display):
@@ -67,7 +67,7 @@ def get_news_content(link):
         return None
 
     except Exception as e:
-        print(f"Error while crawling news content: {e}")
+        print(f"[ERROR] Error while crawling news content: {e}")
         return None
 
 def filter_post(post, keyword, cutoff_date):
@@ -95,8 +95,8 @@ def save_output(json_result, c_name):
         res = json.dumps(json_result, indent=4, sort_keys=True, ensure_ascii=False)
         outfile.write(res)
 
-    print('%s_naver_articles.json SAVED' % c_name)
-    print(f'{save_path} SAVED')
+    print('[SUCCESS] %s_naver_articles.json SAVED' % c_name)
+    print(f'[SUCCESS] {save_path} SAVED')
 
 def run(c_name):
     node = 'news'
@@ -109,7 +109,7 @@ def run(c_name):
 
     json_response = get_naver_search(node, src_text, 1, 100)
     if json_response is None:
-        print("검색 결과를 가져오지 못했습니다.")
+        print("[WARN] 검색 결과를 가져오지 못했습니다.")
         return
 
     total = json_response.get('total', 0)
@@ -123,7 +123,7 @@ def run(c_name):
                 ## At least 1 week
                 pub_date = datetime.datetime.strptime(post['pubDate'], '%a, %d %b %Y %H:%M:%S +0900')
                 if pub_date < one_week_ago:
-                    print("1주일 이전의 기사를 만나 검색을 종료합니다.")
+                    print("[WARN] 1주일 이전의 기사를 만나 검색을 종료합니다.")
                     break
 
         if any(datetime.datetime.strptime(post['pubDate'], '%a, %d %b %Y %H:%M:%S +0900') < one_week_ago for post in json_response.get('items', [])):
@@ -142,11 +142,10 @@ def run(c_name):
                 if content:
                     post['content'] = content
             except Exception as e:
-                print(f"Error processing post {post['cnt']}: {e}")
+                print(f"[ERROR] Error processing post {post['cnt']}: {e}")
 
     save_output(json_result, c_name)
 
     print("\n================[총 검색 결과]================")
-    print('전체 검색 : %d 건' % total)
-    print("가져온 데이터 : %d 건" % cnt)
-    print()
+    print("[INFO] 전체 검색 : %d 건" % total)
+    print("[INFO] 가져온 데이터 : %d 건" % cnt)
