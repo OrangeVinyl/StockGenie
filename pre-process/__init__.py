@@ -16,16 +16,17 @@ def preprocess_ko(lines):
 
     return clean_sentences
 
-def preprocess_en(text):
-    text = clean_punc(text, punct, punct_mapping)
-    text = clean_text([text])[0]
-    return text
+def preprocess_en(lines):
+    cleaned_lines = [clean_punc(line, punct, punct_mapping) for line in lines]
+    cleaned_lines = [clean_text([line])[0] for line in cleaned_lines]
+    return cleaned_lines
 
 
 if __name__ == "__main__":
 
     sentences = [
-        "이 영화는 정말 최악이었다. 배우들의 연기력도 별로고, 스토리도 전혀 흥미롭지 않았다. 시간이 너무 아까웠다."
+        "이 영화는 정말 최악이었다. 배우들의 연기력도 별로고, 스토리도 전혀 흥미롭지 않았다. 시간이 너무 아까웠다.",
+        "이 영화는 정말 최고였다. 배우들의 연기력도 좋았고, 스토리도 흥미로웠다. 시간이 너무 아깝지 않았다."
     ]
 
     en_sentences = [
@@ -40,9 +41,6 @@ if __name__ == "__main__":
     for tokens in processed:
         print(tokens)
 
-    cleaned_sentences = [preprocess_en(sentence) for sentence in en_sentences]
-
-    for original, cleaned in zip(en_sentences, cleaned_sentences):
-        print(f"Original: {original}")
-        print(f"Cleaned: {cleaned}")
-        print("-" * 50)
+    processed_en = preprocess_en(en_sentences)
+    for cleaned in processed_en:
+        print(cleaned)
