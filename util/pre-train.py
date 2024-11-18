@@ -1,17 +1,20 @@
 import pandas as pd
 import torch
-from torch.utils.data import Dataset, DataLoader
+from torch.utils.data import Dataset
 from transformers import AutoTokenizer, AutoModelForSequenceClassification, Trainer, TrainingArguments
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, precision_recall_fscore_support
 import numpy as np
 import warnings
 
+"""
+@description: 한국어 감정 분석 모델 학습 | 일회성 코드
+"""
 
 warnings.filterwarnings("ignore", category=FutureWarning)
 
 # 1. 데이터 로드
-df = pd.read_csv('data/mapped_emotion_dataset.csv', encoding='utf-8')
+df = pd.read_csv('../data/mapped_emotion_dataset.csv', encoding='utf-8')
 
 # 2. 라벨 인코딩
 label_mapping = {'negative': 0, 'neutral': 1, 'positive': 2}
@@ -86,13 +89,13 @@ def compute_metrics(pred):
 
 # 9. 훈련 인자 설정
 training_args = TrainingArguments(
-    output_dir='./results',
+    output_dir='../results',
     num_train_epochs=3,
     per_device_train_batch_size=16,
     per_device_eval_batch_size=32,
     warmup_steps=500,
     weight_decay=0.01,
-    logging_dir='./logs',
+    logging_dir='../logs',
     logging_steps=10,
     eval_strategy='epoch',
     save_strategy='epoch',
@@ -119,7 +122,7 @@ eval_results = trainer.evaluate()
 print(f"Evaluation results: {eval_results}")
 
 # 13. 모델 저장
-model_save_path = 'models/kobert_emotion_classifier'
+model_save_path = '../models/kobert_emotion_classifier'
 trainer.save_model(model_save_path)
 tokenizer.save_pretrained(model_save_path)
 

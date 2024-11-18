@@ -12,6 +12,14 @@ from langchain_community.cache import InMemoryCache
 from .prompts import custom_prompt_template
 
 def load_articles(input_dir, company_name, source):
+    """
+    @description:
+
+    :param input_dir:
+    :param company_name:
+    :param source:
+    :return: articles
+    """
     articles = []
 
     if source == 'naver':
@@ -34,6 +42,15 @@ def load_articles(input_dir, company_name, source):
     return articles
 
 def save_articles(articles, output_dir, company_name, source):
+    """
+    @description:
+
+    :param articles:
+    :param output_dir:
+    :param company_name:
+    :param source:
+    :return:
+    """
     output_file = os.path.join(output_dir, f"{company_name}_{source}_summarized_articles.json")
     with open(output_file, "w", encoding="utf-8") as f:
         json.dump(articles, f, ensure_ascii=False, indent=4)
@@ -41,6 +58,13 @@ def save_articles(articles, output_dir, company_name, source):
     print(f"요약된 기사가 {output_file}에 저장되었습니다.")
 
 def summarize_article(content, chain):
+    """
+    @description:
+
+    :param content:
+    :param chain:
+    :return:
+    """
     if not content:
         return "[WARN] 요약할 내용이 없습니다."
 
