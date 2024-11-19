@@ -1,8 +1,28 @@
 import os
 import time
 import psutil
-from crawlers import naver_crawl , news_crawl
+from crawlers import naver_crawl, news_crawl
 import summarizer
+from pre_process import preprocess_json
+
+def start_performance():
+    process = psutil.Process()
+    start_cpu_times = process.cpu_times()
+    start_wall = time.time()
+
+    return process, start_cpu_times, start_wall
+
+def measure_performance(start_cpu_times, start_wall, end_cpu_times, end_wall):
+    user_time = end_cpu_times.user - start_cpu_times.user
+    system_time = end_cpu_times.system - start_cpu_times.system
+    total_cpu_time = user_time + system_time
+
+    wall_time = end_wall - start_wall
+
+    print("\n======================================================================")
+    print(f"CPU times: user {user_time:.2f} s, sys {system_time:.2f} s, total: {total_cpu_time:.2f} s")
+    print(f"Wall time: {wall_time:.2f} s")
+    print("======================================================================\n")
 
 def get_user_input():
     source = input('기업 분류를 선택하세요 (국내/해외): ').strip()
@@ -29,25 +49,13 @@ def summarize_articles(input_dir, output_dir, company_name, source):
     print("기사를 요약합니다...")
     summarizer.run(input_dir, output_dir, company_name, source)
 
-def measure_performance(start_cpu_times, start_wall, end_cpu_times, end_wall):
-    user_time = end_cpu_times.user - start_cpu_times.user
-    system_time = end_cpu_times.system - start_cpu_times.system
-    total_cpu_time = user_time + system_time
-
-    wall_time = end_wall - start_wall
-
-    print("\n======================================================================")
-    print(f"CPU times: user {user_time:.2f} s, sys {system_time:.2f} s, total: {total_cpu_time:.2f} s")
-    print(f"Wall time: {wall_time:.2f} s")
-    print("======================================================================\n")
-
 def main():
-    process = psutil.Process()
-    start_cpu_times = process.cpu_times()
-    start_wall = time.time()
+    process, start_cpu_times, start_wall = start_performance()
 
+    # 사용자 입력 받기
     source, company_name = get_user_input()
 
+    # 크롤링
     input_dir, crawl_source, company_name = crawl_articles(source, company_name)
     if input_dir is None:
         return
@@ -56,12 +64,14 @@ def main():
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
 
-    summarize_articles(input_dir, output_dir, company_name, crawl_source)
+    # 요약
+    summarize_articles(input_dir, output_dir, crawl_source)
 
+    # 데이터 전처리
+    preprocess_json(source, output_dir, company_name)
 
-    end_cpu_times = process.cpu_times()
-    end_wall = time.time()
-    measure_performance(start_cpu_times, start_wall, end_cpu_times, end_wall)
+    measure_performance(start_cpu_times, start_wall, process.cpu_times(), time.time())
+
 
 if  __name__ == '__main__':
     main()
