@@ -19,7 +19,7 @@ Mecab을 사용하는 경우에만 주석을 해제하고 사용하면 됨
 #     :param text:
 #     :return:
 #     """
-#     mecab = Mecab(dicpath=r"C:\mecab\share\mecab-ko-dic")
+#     mecab = Mecab(dicpath=r"C:\mecab\share\mecab-kor-dic")
 #     STOPWORDS = load_stopwords('../../data/stopwords.txt')
 #
 #     morphs = mecab.pos(text)
