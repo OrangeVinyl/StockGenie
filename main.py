@@ -2,7 +2,7 @@ import os
 import time
 import psutil
 from crawlers import naver_crawl , news_crawl
-from summarizer import summarizer
+import summarizer
 
 def get_user_input():
     source = input('기업 분류를 선택하세요 (국내/해외): ').strip()
