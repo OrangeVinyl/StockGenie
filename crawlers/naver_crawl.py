@@ -1,8 +1,9 @@
 import os
-import urllib.request
-import datetime
 import json
+import logging
+import datetime
 import requests
+import urllib.request
 from bs4 import BeautifulSoup
 from dotenv import load_dotenv
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -20,27 +21,20 @@ def get_request_url(url):
     try:
         response = urllib.request.urlopen(req)
         if response.getcode() == 200:
-            print("[SUCCESS] [%s] Url Request Success" % datetime.datetime.now())
             return response.read().decode('utf-8')
     except Exception as e:
-        print()
-        print("================[ END ]================")
         print("[INFO] [%s] LAST URL : %s" % (datetime.datetime.now(), url))
         return None
 
-def get_naver_search(node, src_text, start, display):
-    base = "https://openapi.naver.com/v1/search"
-    node = "/" + node + ".json"
+def get_naver_search(company_name, start, display):
+    base = "https://openapi.naver.com/v1/search/news.json"
+    parameters = "?query=%s&start=%s&display=%s&sort=sim" % (urllib.parse.quote(company_name), start, display)
 
-    parameters = "?query=%s&start=%s&display=%s&sort=date" % (urllib.parse.quote(src_text), start, display)
+    url = base + parameters
+    response = get_request_url(url)
 
-    url = base + node + parameters
-    response_decode = get_request_url(url)
-
-    if response_decode is None:
-        return None
-    else:
-        return json.loads(response_decode)
+    if response is not None:
+        return json.loads(response)
 
 def get_post_data(post, json_result, cnt):
     title = post['title']
@@ -98,54 +92,85 @@ def save_output(json_result, c_name):
     print('[SUCCESS] %s_naver_articles.json SAVED' % c_name)
     print(f'[SUCCESS] {save_path} SAVED')
 
-def run(c_name):
-    node = 'news'
-    src_text = c_name
+def run(company_name):
     cnt = 0
     json_result = []
-
     today = datetime.datetime.now()
-    one_week_ago = today - datetime.timedelta(weeks=1)
+    one_week_ago = today - datetime.timedelta(days=7)
 
-    json_response = get_naver_search(node, src_text, 1, 100)
-    if json_response is None:
-        print("[WARN] 검색 결과를 가져오지 못했습니다.")
-        return
+    print (today, one_week_ago)
 
-    total = json_response.get('total', 0)
+    # 각 날짜별 기사 수를 저장할 딕셔너리 초기화
+    articles_per_day = {}
+    for i in range(7):
+        day = (today - datetime.timedelta(days=i)).strftime('%Y-%m-%d')
+        articles_per_day[day] = 0
 
-    while (json_response is not None) and (json_response.get('display', 0) != 0):
-        for post in json_response.get('items', []):
-            if filter_post(post, src_text, one_week_ago):
-                cnt += 1
-                get_post_data(post, json_result, cnt)
-            else:
-                ## At least 1 week
-                pub_date = datetime.datetime.strptime(post['pubDate'], '%a, %d %b %Y %H:%M:%S +0900')
-                if pub_date < one_week_ago:
-                    print("[WARN] 1주일 이전의 기사를 만나 검색을 종료합니다.")
-                    break
+    start = 1
+    display = 100
+    total = 0
 
-        if any(datetime.datetime.strptime(post['pubDate'], '%a, %d %b %Y %H:%M:%S +0900') < one_week_ago for post in json_response.get('items', [])):
+    while True:
+        json_response = get_naver_search(company_name, start, display)
+
+        if json_response is None or json_response.get('display', 0) == 0:
+            print("[WARN] 더 이상 가져올 기사가 없습니다.")
             break
 
-        start = json_response['start'] + json_response['display']
-        json_response = get_naver_search(node, src_text, start, 100)
+        if total == 0:
+            total = json_response.get('total', 0)
 
-    ## Multi Threading
+        items = json_response.get('items', [])
+        if not items:
+            break
+
+        for post in items:
+            pub_date = datetime.datetime.strptime(post['pubDate'], '%a, %d %b %Y %H:%M:%S +0900')
+
+            if pub_date < one_week_ago:
+                continue
+
+            date_str = pub_date.strftime('%Y-%m-%d')
+            if date_str in articles_per_day:
+                articles_per_day[date_str] += 1
+
+            if filter_post(post, company_name, one_week_ago):
+                cnt += 1
+                get_post_data(post, json_result, cnt)
+
+        if all(count >= 1 for count in articles_per_day.values()) and cnt >= 20:
+            break
+
+        if cnt >= 300:
+            break
+
+        start += display
+
+        if start > 1000:  # 네이버 API의 최대 검색 범위 고려
+            print("[WARN] 네이버 API의 최대 검색 한도에 도달했습니다.")
+            break
+
+    # 멀티스레딩으로 기사 본문 수집
     with ThreadPoolExecutor(max_workers=10) as executor:
-        future_to_url = {executor.submit(get_news_content, post['link']): post for post in json_result}
-        for future in as_completed(future_to_url):
-            post = future_to_url[future]
+        future_to_post = {executor.submit(get_news_content, post['link']): post for post in json_result}
+        for future in as_completed(future_to_post):
+            post = future_to_post[future]
             try:
                 content = future.result()
                 if content:
                     post['content'] = content
             except Exception as e:
-                print(f"[ERROR] Error processing post {post['cnt']}: {e}")
+                logging.error(f"[ERROR] 멀티스레딩 에러: {e}")
 
-    save_output(json_result, c_name)
+    save_output(json_result, company_name)
 
-    print("\n================[총 검색 결과]================")
-    print("[INFO] 전체 검색 : %d 건" % total)
+    print("\n===== [총 검색 결과] =====")
+    print("[INFO] 전체 검색 결과 : %d 건" % total)
     print("[INFO] 가져온 데이터 : %d 건" % cnt)
+    print("[INFO] 날짜별 기사 수 :")
+    for date_str, count in sorted(articles_per_day.items()):
+        print(f"{date_str}: {count}건")
+
+
+def test_naver_crwal():
+    run('삼성화재')
