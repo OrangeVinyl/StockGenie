@@ -8,7 +8,7 @@ punct_mapping = {"‘": "'", "₹": "e", "´": "'", "°": "", "€": "e", "™":
 
 def clean_punc(text, punct, mapping):
     """
-    @description: 특수 문자와 구두점을 정제하는 함수
+    @description: 특수 문자와 구두점을 정제하여 반환
 
     :param text: string
     :param punct: array of punctuation
@@ -29,7 +29,7 @@ def clean_punc(text, punct, mapping):
 
 def clean_text(texts):
     """
-    @description: 텍스트를 정제하는 함수
+    @description: 텍스트를 정제하여 반환
 
     :param texts:
     :return: array of clean text

@@ -1,16 +1,18 @@
 import os
 import json
-from ko.spacing import correct_spacing
-from ko.splitter import split_sentences
 from soynlp.normalizer import repeat_normalize
-from cleaner import clean_punc, clean_text, punct, punct_mapping
+
+from preprocessing.cleaner import clean_punc, clean_text, punct, punct_mapping
+from preprocessing.spacing import correct_spacing
+from preprocessing.splitter import split_sentences, split_sentences_en
+
 
 def preprocess_ko(lines):
     normalized_lines = [repeat_normalize(line, num_repeats=2) for line in lines]
 
     spaced_lines = correct_spacing(normalized_lines)
-    s_sentences = split_sentences(spaced_lines)
-    clean_sentences = clean_text(s_sentences)
+    splits = split_sentences(spaced_lines)
+    clean_sentences = clean_text(splits)
 
     ## 형태소 분석 -- ML/DL 모델에 따라 사용
     # processed_sentences = [extract_relevant_words(sentence) for sentence in clean_sentences]
@@ -19,9 +21,12 @@ def preprocess_ko(lines):
     return clean_sentences
 
 def preprocess_en(lines):
-    cleaned_lines = [clean_punc(line, punct, punct_mapping) for line in lines]
-    cleaned_lines = [clean_text([line])[0] for line in cleaned_lines]
-    return cleaned_lines
+    clean_punc_lines = [clean_punc(line, punct, punct_mapping) for line in lines]
+    #cleaned_lines = [clean_text([line])[0] for line in cleaned_lines]1
+    splits = split_sentences_en(clean_punc_lines)
+    clean_sentences = clean_text(splits)
+
+    return clean_sentences
 
 
 def preprocess_json(source, dir_path, company_name):
@@ -35,6 +40,7 @@ def preprocess_json(source, dir_path, company_name):
 
     :return None
     """
+    print("==============================[전처리]==============================")
     company_name_lower = company_name.lower()
 
     for filename in os.listdir(dir_path):
@@ -51,9 +57,9 @@ def preprocess_json(source, dir_path, company_name):
                 summary = entry.get('summary', '')
                 if summary:
                     if source == '국내':
-                        processed_summary = preprocess_ko([summary])[0]
+                        processed_summary = preprocess_ko([summary])
                     elif source == '해외':
-                        processed_summary = preprocess_en([summary])[0]
+                        processed_summary = preprocess_en([summary])
                     else:
                         processed_summary = summary
 
@@ -65,26 +71,26 @@ def preprocess_json(source, dir_path, company_name):
                 json.dump(data, f, ensure_ascii=False, indent=4)
             print(f"[SUCCESS] 전처리 완료: {file_path}")
 
-## 테스트 용도
-# def run():
-#     sentences = [
-#         "이 영화는 정말 최악이었다. 배우들의 연기력도 별로고, 스토리도 전혀 흥미롭지 않았다. 시간이 너무 아까웠다.",
-#         "이 영화는 정말 최고였다. 배우들의 연기력도 좋았고, 스토리도 흥미로웠다. 시간이 너무 아깝지 않았다."
-#     ]
-#
-#     en_sentences = [
-#         "I absolutely loved the new movie! It was fantastic and thrilling.",
-#         "The service was terrible. I had a very bad experience.",
-#         "The event was okay, nothing special but not bad either.",
-#         "I'm extremely happy with the results of this project.",
-#         "I'm disappointed with the quality of the product."
-#     ]
-#
-#
-#     processed = preprocess_ko(sentences)
-#     for tokens in processed:
-#         print(tokens)
-#
-#     processed_en = preprocess_en(en_sentences)
-#     for cleaned in processed_en:
-#         print(cleaned)
+
+def func_test():
+    sentences = [
+        "이 영화는 정말 최악이었다. 배우들의 연기력도 별로고, 스토리도 전혀 흥미롭지 않았다. 시간이 너무 아까웠다.",
+        "이 영화는 정말 최고였다. 배우들의 연기력도 좋았고, 스토리도 흥미로웠다. 시간이 너무 아깝지 않았다."
+    ]
+
+    en_sentences = [
+        "I absolutely loved the new movie! It was fantastic and thrilling.",
+        "The service was terrible. I had a very bad experience.",
+        "The event was okay, nothing special but not bad either.",
+        "I'm extremely happy with the results of this project.",
+        "I'm disappointed with the quality of the product."
+    ]
+
+
+    processed = preprocess_ko(sentences)
+    for tokens in processed:
+        print(tokens)
+
+    processed_en = preprocess_en(en_sentences)
+    for cleaned in processed_en:
+        print(cleaned)
