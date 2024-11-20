@@ -1,9 +1,11 @@
 import os
 import time
 import psutil
-from crawlers import naver_crawl, news_crawl
 import summarizer
-from pre_process import preprocess_json
+from sentiment import decide_sentiment
+from preprocessing import preprocess_json
+from crawlers import naver_crawl, news_crawl
+
 
 def start_performance():
     process = psutil.Process()
@@ -34,41 +36,39 @@ def crawl_articles(source, company_name):
         print("국내 뉴스를 크롤링합니다...")
         naver_crawl.run(company_name)
         input_dir = os.path.join("data", "naver_articles")
-        crawl_source = 'naver'
+        crawl_domain = 'naver'
     elif source == '해외':
         print("해외 뉴스를 크롤링합니다...")
         news_crawl.run(company_name)
         input_dir = os.path.join("data", "news_articles")
-        crawl_source = 'news'
+        crawl_domain = 'news'
     else:
         print("잘못된 소스입니다. '국내' 또는 '해외'를 입력해주세요.")
         return None, None, None
-    return input_dir, crawl_source, company_name
+    return input_dir, crawl_domain, company_name
 
 def summarize_articles(input_dir, output_dir, company_name, source):
-    print("기사를 요약합니다...")
+    print("\n[기사 요약]==============================")
     summarizer.run(input_dir, output_dir, company_name, source)
 
 def main():
     process, start_cpu_times, start_wall = start_performance()
 
-    # 사용자 입력 받기
     source, company_name = get_user_input()
 
-    # 크롤링
-    input_dir, crawl_source, company_name = crawl_articles(source, company_name)
+    input_dir, crawl_domain, company_name = crawl_articles(source, company_name)
+
     if input_dir is None:
         return
-
     output_dir = os.path.join("data", "processed_articles")
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
 
-    # 요약
-    summarize_articles(input_dir, output_dir, crawl_source)
+    summarize_articles(input_dir, output_dir, company_name, crawl_domain)
 
-    # 데이터 전처리
     preprocess_json(source, output_dir, company_name)
+
+    decide_sentiment(source, output_dir, company_name)
 
     measure_performance(start_cpu_times, start_wall, process.cpu_times(), time.time())
 

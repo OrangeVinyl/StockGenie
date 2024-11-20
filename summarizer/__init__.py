@@ -55,7 +55,7 @@ def save_articles(articles, output_dir, company_name, source):
     with open(output_file, "w", encoding="utf-8") as f:
         json.dump(articles, f, ensure_ascii=False, indent=4)
 
-    print(f"요약된 기사가 {output_file}에 저장되었습니다.")
+    print(f"[SUCCESS] 요약된 기사가 {output_file}에 저장되었습니다.")
 
 def summarize_article(content, chain):
     """
@@ -63,7 +63,7 @@ def summarize_article(content, chain):
 
     :param content:
     :param chain:
-    :return:
+    :return:+
     """
     if not content:
         return "[WARN] 요약할 내용이 없습니다."
@@ -99,7 +99,7 @@ def clean_source_files(input_dir, company_name, source):
             file_path = os.path.join(input_dir, filename)
             try:
                 os.remove(file_path)
-                print(f"[SUCCESS] Removed file: {file_path}")
+                print(f"[SUCCESS] 기존 파일 제거: {file_path}")
             except Exception as e:
                 print(f"[ERROR] Error removing file {file_path}: {e}")
 
