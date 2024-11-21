@@ -1,31 +1,29 @@
+import os
 import json
 import pandas as pd
-import os
-import re
 
 def extract_data_from_json(json_file_path):
     """
-    JSON 파일에서 필요한 데이터를 추출하는 함수.
-    필요한 필드: title, summary, publish_date, positive, neutral, negative
+    @description JSON 파일에서 필요한 데이터를 추출하는 함수
+
+    :param json_file_path: JSON 파일 경로
     """
     with open(json_file_path, 'r', encoding='utf-8') as file:
         try:
             data = json.load(file)
         except json.JSONDecodeError as e:
-            print(f"JSON 디코딩 에러: {json_file_path} - {e}")
+            print(f"[ERROR] extract_data_from_json: {json_file_path} - {e}")
             return []
         except Exception as e:
-            print(f"파일 읽기 에러: {json_file_path} - {e}")
+            print(f"[ERROR] 파일 읽기 에러: {json_file_path} - {e}")
             return []
 
-    # JSON 데이터가 리스트 형태인지 확인
     if isinstance(data, dict):
-        # 데이터가 딕셔너리라면, 리스트로 감싸기
         articles = [data]
     elif isinstance(data, list):
         articles = data
     else:
-        print(f"예상하지 못한 JSON 형식: {json_file_path}")
+        print(f"[ERROR] 예상하지 못한 JSON 형식: {json_file_path}")
         return []
 
     extracted = []
@@ -52,8 +50,50 @@ def extract_data_from_json(json_file_path):
     return extracted
 
 
+def save_raw_data(df, csv_folder_path, company_name):
+    """
+    @description 정제된 데이터를 원본 CSV 파일로 저장하는 함수
+
+    :param df: 정제된 데이터프레임
+    :param csv_folder_path: CSV 파일들이 저장될 폴더 경로
+    :param company_name: 기업명
+    """
+    csv_filename = f"{company_name}_datasets.csv"
+    csv_file_path = os.path.join(csv_folder_path, csv_filename)
+
+    df.to_csv(csv_file_path, index=False, encoding='utf-8-sig')
+    print(f"\n[SUCCESS] save_raw_data: {csv_file_path}")
+
+
+def aggregate_and_save(df, csv_folder_path, company_name):
+    """
+    @description 날짜별로 데이터를 집계하고 평균을 계산하여 별도의 CSV 파일로 저장하는 함수
+
+    Parameters:
+    :param df: 정제된 데이터프레임
+    :param csv_folder_path: CSV 파일들이 저장될 폴더 경로
+    :param company_name: 기업명
+    """
+    grouped = df.groupby('publish_date').agg({
+        'positive': 'mean',
+        'neutral': 'mean',
+        'negative': 'mean'
+    }).reset_index()
+
+    def determine_total(row):
+        sentiments = {'positive': row['positive'], 'neutral': row['neutral'], 'negative': row['negative']}
+        return max(sentiments, key=sentiments.get)
+
+    grouped['total'] = grouped.apply(determine_total, axis=1)
+
+    aggregated_csv_filename = f"{company_name}_aggregated.csv"
+    aggregated_csv_file_path = os.path.join(csv_folder_path, aggregated_csv_filename)
+    grouped.to_csv(aggregated_csv_file_path, index=False, encoding='utf-8-sig')
+
+    print(f"[SUCCESS] aggregate_and_save: {aggregated_csv_file_path}")
+
 def run(company_name, source):
-    script_dir = os.path.dirname(os.path.abspath(__file__))
+    script_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 
     json_folder_path = os.path.join(script_dir, 'data', 'processed_articles')
     csv_folder_path = os.path.join(script_dir, 'data', 'csv_datasets')
@@ -62,11 +102,6 @@ def run(company_name, source):
         os.makedirs(csv_folder_path)
 
     all_extracted_data = []
-
-    if source == 'naver':
-        json_filename = f"{company_name}_naver_summarized_articles.json"
-    elif source == 'news':
-        json_filename = f"{company_name}_news_summarized_articles.json"
 
     file_path = os.path.join(json_folder_path, f"{company_name}_{source}_summarized_articles.json")
     extracted = extract_data_from_json(file_path)
@@ -85,13 +120,8 @@ def run(company_name, source):
     df['neutral'] = df['neutral'].fillna(0.0)
     df['negative'] = df['negative'].fillna(0.0)
 
-    # CSV 파일로 저장
-    csv_filename = f"{company_name}_datasets.csv"
-    csv_file_path = os.path.join(csv_folder_path, csv_filename)
-    df.to_csv(csv_file_path, index=False, encoding='utf-8-sig')
-
-    print(f"선택된 JSON 파일이 성공적으로 CSV로 변환되었습니다: {csv_file_path}")
-
+    save_raw_data(df, csv_folder_path, company_name)
+    aggregate_and_save(df, csv_folder_path, company_name)
 
 def test_json_to_csv():
     run('Intel', 'news')
