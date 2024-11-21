@@ -35,14 +35,12 @@ def crawl_articles(source, company_name):
         print("국내 뉴스를 크롤링합니다...")
         naver_crawl.run(company_name)
 
-        # TODO: run에서 return한 값으로 input_dir, crawl_domain 설정
         input_dir = os.path.join("data", "naver_articles")
         crawl_domain = 'naver'
     elif source == '해외':
         print("해외 뉴스를 크롤링합니다...")
         news_crawl.run(company_name)
 
-        # TODO: run에서 return한 값으로 input_dir, crawl_domain 설정
         input_dir = os.path.join("data", "news_articles")
         crawl_domain = 'news'
     else:

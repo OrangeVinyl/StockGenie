@@ -93,22 +93,22 @@ def save_output(json_result, c_name):
     print(f'[SUCCESS] {save_path} SAVED')
 
 def run(company_name):
-    cnt = 0
-    json_result = []
+    # 기사 수집을 위한 변수 초기화
     today = datetime.datetime.now()
     one_week_ago = today - datetime.timedelta(days=7)
 
-    print (today, one_week_ago)
+    cnt = 0
+    start = 1 # 검색 시작 위치 (1~1000)
+    display = 100 # 검색 결과 출력 건수 (10~100)
+    total = 0 # 검색 결과 총 건수
+
+    json_result = []
 
     # 각 날짜별 기사 수를 저장할 딕셔너리 초기화
     articles_per_day = {}
     for i in range(7):
         day = (today - datetime.timedelta(days=i)).strftime('%Y-%m-%d')
         articles_per_day[day] = 0
-
-    start = 1
-    display = 100
-    total = 0
 
     while True:
         json_response = get_naver_search(company_name, start, display)
@@ -146,13 +146,13 @@ def run(company_name):
 
         start += display
 
-        if start > 1000:  # 네이버 API의 최대 검색 범위 고려
+        if start > 1000:
             print("[WARN] 네이버 API의 최대 검색 한도에 도달했습니다.")
             break
 
-    # 멀티스레딩으로 기사 본문 수집
     with ThreadPoolExecutor(max_workers=10) as executor:
         future_to_post = {executor.submit(get_news_content, post['link']): post for post in json_result}
+
         for future in as_completed(future_to_post):
             post = future_to_post[future]
             try:
@@ -160,11 +160,11 @@ def run(company_name):
                 if content:
                     post['content'] = content
             except Exception as e:
-                logging.error(f"[ERROR] 멀티스레딩 에러: {e}")
+                logging.error(f"[ERROR] ThreadPoolExecutor error: {e}")
 
     save_output(json_result, company_name)
 
-    print("\n===== [총 검색 결과] =====")
+    print("\n===== [검색 결과] =====")
     print("[INFO] 전체 검색 결과 : %d 건" % total)
     print("[INFO] 가져온 데이터 : %d 건" % cnt)
     print("[INFO] 날짜별 기사 수 :")
@@ -172,5 +172,5 @@ def run(company_name):
         print(f"{date_str}: {count}건")
 
 
-def test_naver_crwal():
+def test_naver_crawl():
     run('삼성화재')
