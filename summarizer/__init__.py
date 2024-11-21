@@ -13,7 +13,7 @@ from .prompts import CUSTOM_PROMPT, EN_CUSTOM_PROMPT
 
 def load_articles(input_dir, company_name, source):
     """
-    @description:
+    @description: 지정된 디렉토리에서 기사 데이터 로드
 
     :param input_dir:
     :param company_name:
