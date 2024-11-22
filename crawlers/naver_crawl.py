@@ -13,6 +13,8 @@ load_dotenv()
 client_id = os.getenv("NAVER_CLIENT")
 client_secret = os.getenv("NAVER_SECRET")
 
+limit_days = 30 # 가져올 날짜 수
+
 def get_request_url(url):
     req = urllib.request.Request(url)
     req.add_header("X-Naver-Client-Id", client_id)
@@ -69,7 +71,6 @@ def filter_post(post, keyword, cutoff_date):
     link = post['link']
     pub_date = datetime.datetime.strptime(post['pubDate'], '%a, %d %b %Y %H:%M:%S +0900')
 
-    # 키워드 포함, 네이버 뉴스 링크, 최근 1주일 내 게시된 기사
     if (keyword.lower() in title.lower() and
         "n.news.naver.com" in link and
         pub_date >= cutoff_date):
@@ -95,7 +96,7 @@ def save_output(json_result, c_name):
 def run(company_name):
     # 기사 수집을 위한 변수 초기화
     today = datetime.datetime.now()
-    one_week_ago = today - datetime.timedelta(days=7)
+    one_week_ago = today - datetime.timedelta(days=limit_days)
 
     cnt = 0
     start = 1 # 검색 시작 위치 (1~1000)
@@ -106,7 +107,7 @@ def run(company_name):
 
     # 각 날짜별 기사 수를 저장할 딕셔너리 초기화
     articles_per_day = {}
-    for i in range(7):
+    for i in range(limit_days):
         day = (today - datetime.timedelta(days=i)).strftime('%Y-%m-%d')
         articles_per_day[day] = 0
 
@@ -173,4 +174,7 @@ def run(company_name):
 
 
 def test_naver_crawl():
-    run('삼성화재')
+    run('삼성전자')
+    # run('SK하이닉스')
+    # run('LG에너지솔루션')
+    # run('셀트리온')

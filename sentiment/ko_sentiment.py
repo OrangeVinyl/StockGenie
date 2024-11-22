@@ -34,20 +34,18 @@ def predict_emotions(texts, model, tokenizer):
     :param tokenizer: HuggingFace 토크나이저
     :return: tuple (per_sentence_scores, aggregate_scores)
     """
-    model.eval()  # 모델을 평가 모드로 설정
+    model.eval()
     encoding = tokenizing_texts(texts, tokenizer)
 
-    # 입력 데이터를 모델에 전달
     with torch.no_grad():
         inputs = {key: val.to(model.device) for key, val in encoding.items()}
         outputs = model(**inputs)
 
     # logits 가져오기
     logits = outputs.logits
-    probs = F.softmax(logits, dim=1)  # 소프트맥스를 사용해 확률 계산
+    probs = F.softmax(logits, dim=1)
     probs_list = probs.tolist()
 
-    # 레이블을 3가지 감정으로 매핑
     label_mapping = {0: 'negative', 1: 'neutral', 2: 'positive'}
 
     # 각 문장별 감정 점수
@@ -72,14 +70,6 @@ def predict_emotions(texts, model, tokenizer):
         aggregate_scores[key] /= num_sentences
 
     return per_sentence_scores, aggregate_scores
-
-    # # 확률 및 예측 결과 출력
-    # print("===== 예측 결과 =====")
-    # print(f"입력 문장: {text}")
-    # print("Logits(비정규화 점수): ", [round(logit, 4) for logit in logits.squeeze().tolist()])
-    # print("확률(%) : ", [round(prob * 100, 2) for prob in probs_list])
-    # print(f"예측 감성: {emotion}")
-    # print("=====================\n")
 
 # def test_ko_sentiment():
 #     test_sentences = [

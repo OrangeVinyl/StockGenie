@@ -92,21 +92,21 @@ def save_to_json(data, company_name):
     print(f'[SUCCESS] {save_path} SAVED')
 
 def run(company_name):
-    today = datetime.datetime.now()
-    seven_days_ago = today - datetime.timedelta(days=7)
-
     cnt = 1
-    max_articles = 300  # 최대 기사 수
+    max_articles = 500  # 최대 기사 수
     min_articles = 20  # 최소 기사 수
+    limit_days = 30  # 가져올 날짜 수
 
+    today = datetime.datetime.now()
+    days_ago = today - datetime.timedelta(days=limit_days)
     json_result = []
     total_results = 0
 
     dates_with_articles = set()
-    date_range = {(seven_days_ago + datetime.timedelta(days=i)).strftime('%Y-%m-%d') for i in range(7)}
+    date_range = {(days_ago + datetime.timedelta(days=i)).strftime('%Y-%m-%d') for i in range(limit_days)}
 
-    for i in range(7):
-        single_day = (seven_days_ago + datetime.timedelta(days=i)).strftime('%Y-%m-%d')
+    for i in range(limit_days):
+        single_day = (today - datetime.timedelta(days=i)).strftime('%Y-%m-%d')
         print(f"================= {single_day} =================")
 
         data = get_news_search(API_KEY, company_name, single_day, single_day, page=1, page_size=100)
@@ -118,7 +118,7 @@ def run(company_name):
                 print(f"[WARN] {single_day}에 대한 기사가 없습니다.")
                 continue
 
-            filtered_articles = [article for article in articles if filter_article(article, company_name, seven_days_ago)]
+            filtered_articles = [article for article in articles if filter_article(article, company_name, days_ago)]
             if not filtered_articles:
                 print(f"[WARN] {single_day}에 필터링된 기사가 없습니다.")
                 continue
@@ -168,4 +168,5 @@ def run(company_name):
 
 
 def test_news_craw():
-    run('Coca-Cola')
+    run('nvidia')
+    # run('tesla')
