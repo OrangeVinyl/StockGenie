@@ -2,7 +2,9 @@ import os
 from . import stock_code_lookup as scl
 from . import yfinance_api as ya
 
-SAVE_PATH = "../data/stock_dataset"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+SAVE_PATH = os.path.join(BASE_DIR, '../data/stock_dataset')
+
 
 def decide_stock_market(market_type, company_name):
     if market_type == '국내':
@@ -38,4 +40,4 @@ def decide_stock_market(market_type, company_name):
     data.to_csv(save_file)
 
 def test_stock_market():
-    decide_stock_market('해외', 'TSMC')
+    decide_stock_market('국내', '삼성전자')
