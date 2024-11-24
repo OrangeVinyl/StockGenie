@@ -38,7 +38,9 @@ def predict_emotions_en(texts):
     for label in aggregate_scores:
         aggregate_scores[label] /= num_sentences
 
-    return per_sentence_scores, aggregate_scores
+    max_label = max(aggregate_scores, key=aggregate_scores.get)
+
+    return per_sentence_scores, aggregate_scores, max_label
 
 
 
@@ -49,7 +51,7 @@ def test_en_sentiment():
         "New product launches have boosted investor confidence."
     ]
 
-    per_sentence_scores_en, aggregate_scores_en = predict_emotions_en(test_sentences)
+    per_sentence_scores_en, aggregate_scores_en, max_label = predict_emotions_en(test_sentences)
 
     # 영어 결과 출력
     print("===== English Sentiment Analysis =====")

@@ -2,10 +2,9 @@ import torch
 import torch.nn.functional as F
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
 
-## 모델 및 토크나이저 불러오기(test_ko_sentiment 실행 시 주석 해제)
-# model_save_path = '../models/kobert_emotion_classifier'
-# tokenizer = AutoTokenizer.from_pretrained(model_save_path)
-# model = AutoModelForSequenceClassification.from_pretrained(model_save_path)
+model_save_path = './models/kobert_emotion_classifier'
+tokenizer = AutoTokenizer.from_pretrained(model_save_path)
+model = AutoModelForSequenceClassification.from_pretrained(model_save_path)
 
 def tokenizing_texts(texts, tokenizer, max_length=128):
     """
@@ -69,7 +68,9 @@ def predict_emotions(texts, model, tokenizer):
     for key in aggregate_scores:
         aggregate_scores[key] /= num_sentences
 
-    return per_sentence_scores, aggregate_scores
+    max_label = max(aggregate_scores, key=aggregate_scores.get)
+
+    return per_sentence_scores, aggregate_scores, max_label
 
 # def test_ko_sentiment():
 #     test_sentences = [
