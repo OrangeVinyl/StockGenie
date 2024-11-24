@@ -2,9 +2,11 @@ import os
 import time
 import psutil
 import summarizer
+from finance.finance_reader import decide_stock_market
 from sentiment import decide_sentiment
 from preprocessing import preprocess_json
 from crawlers import naver_crawl, news_crawl
+from util import json_to_csv
 
 def start_performance():
     process = psutil.Process()
@@ -26,7 +28,7 @@ def measure_performance(start_cpu_times, start_wall, end_cpu_times, end_wall):
     print("======================================================================\n")
 
 def get_user_input():
-    source = input('기업 분류를 선택하세요 (국내/해외): ').strip()
+    source = input('시장 유형을 선택하세요 (국내/해외): ').strip()
     company_name = input("기업 이름을 입력하세요 : ").strip()
     return source, company_name
 
@@ -63,11 +65,18 @@ def main():
 
     input_dir, crawl_domain, company_name = crawl_articles(source, company_name)
 
+    print(input_dir, output_dir, company_name, source, crawl_domain)
+
     summarize_articles(input_dir, output_dir, company_name, crawl_domain)
 
     preprocess_json(source, output_dir, company_name)
 
     decide_sentiment(source, output_dir, company_name)
+
+    json_to_csv.run(company_name, source)
+
+    # 금융데이터 가져오기
+    decide_stock_market(source, company_name)
 
     measure_performance(start_cpu_times, start_wall, process.cpu_times(), time.time())
 

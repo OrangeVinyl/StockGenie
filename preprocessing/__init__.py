@@ -72,7 +72,7 @@ def preprocess_json(source, dir_path, company_name):
             print(f"[SUCCESS] 전처리 완료: {file_path}")
 
 
-def func_test():
+def test_preprocessing():
     sentences = [
         "이 영화는 정말 최악이었다. 배우들의 연기력도 별로고, 스토리도 전혀 흥미롭지 않았다. 시간이 너무 아까웠다.",
         "이 영화는 정말 최고였다. 배우들의 연기력도 좋았고, 스토리도 흥미로웠다. 시간이 너무 아깝지 않았다."
@@ -94,3 +94,6 @@ def func_test():
     processed_en = preprocess_en(en_sentences)
     for cleaned in processed_en:
         print(cleaned)
+
+if __name__ == '__main__':
+    test_preprocessing()
