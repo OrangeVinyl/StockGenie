@@ -1,11 +1,11 @@
-import stock_code_lookup as scl
-import yfinance_api as ya
-import pandas as pd
+import os
+from . import stock_code_lookup as scl
+from . import yfinance_api as ya
 
-def main():
-    market_type = input('시장 유형을 선택하세요 (국내/국외): ')
+SAVE_PATH = "../data/stock_dataset"
+
+def decide_stock_market(market_type, company_name):
     if market_type == '국내':
-        company_name = input('기업명을 입력하세요: ')
         stock_code, market = scl.get_domestic_stock_code(company_name)
 
         if stock_code:
@@ -20,8 +20,7 @@ def main():
         else:
             print(f"{company_name}의 종목 코드를 찾을 수 없습니다.")
             return
-    elif market_type == '국외':
-        company_name = input('기업명을 입력하세요: ')
+    elif market_type == '해외':
         stock_code = scl.get_us_stock_code(company_name)
 
         if stock_code:
@@ -33,7 +32,10 @@ def main():
         print('잘못된 입력입니다.')
         return
 
-    ya.print_recent_data(stock_code)
+    data = ya.print_recent_data(stock_code)
 
-if __name__ == '__main__':
-    main()
+    save_file = os.path.join(SAVE_PATH, f"{company_name}_stock_dataset.csv")
+    data.to_csv(save_file)
+
+def test_stock_market():
+    decide_stock_market('해외', 'TSMC')
