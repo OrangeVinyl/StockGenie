@@ -91,7 +91,7 @@ def main():
 
     input_dir, crawl_domain, company_name = crawl_articles(source, company_name)
 
-    print(input_dir, output_dir, company_name, source, crawl_domain)
+    print("========== debugging ===========", input_dir, output_dir, company_name, source, crawl_domain)
 
     summarize_articles(input_dir, output_dir, company_name, crawl_domain)
 
@@ -102,6 +102,8 @@ def main():
     json_to_csv.run(company_name, crawl_domain)
 
     decide_stock_market(source, company_name)
+
+    ## TODO: 예측모델 실행
 
     measure_performance(start_cpu_times, start_wall, process.cpu_times(), time.time())
 
