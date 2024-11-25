@@ -93,9 +93,9 @@ def save_to_json(data, company_name):
 
 def run(company_name):
     cnt = 1
-    max_articles = 500  # 최대 기사 수
+    max_articles = 210  # 최대 기사 수
     min_articles = 20  # 최소 기사 수
-    limit_days = 30  # 가져올 날짜 수
+    limit_days = 7  # 가져올 날짜 수
 
     today = datetime.datetime.now()
     days_ago = today - datetime.timedelta(days=limit_days)

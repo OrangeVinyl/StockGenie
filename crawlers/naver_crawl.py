@@ -13,7 +13,7 @@ load_dotenv()
 client_id = os.getenv("NAVER_CLIENT")
 client_secret = os.getenv("NAVER_SECRET")
 
-limit_days = 30 # 가져올 날짜 수
+limit_days = 7 # 가져올 날짜 수
 
 def get_request_url(url):
     req = urllib.request.Request(url)
@@ -175,6 +175,3 @@ def run(company_name):
 
 def test_naver_crawl():
     run('삼성전자')
-    # run('SK하이닉스')
-    # run('LG에너지솔루션')
-    # run('셀트리온')
