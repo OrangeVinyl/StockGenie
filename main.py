@@ -73,7 +73,7 @@ def main():
 
     decide_sentiment(source, output_dir, company_name)
 
-    json_to_csv.run(company_name, source)
+    json_to_csv.run(company_name, crawl_domain)
 
     # 금융데이터 가져오기
     decide_stock_market(source, company_name)

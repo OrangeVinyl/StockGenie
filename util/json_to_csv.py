@@ -69,7 +69,6 @@ def aggregate_and_save(df, csv_folder_path, company_name):
     """
     @description 날짜별로 데이터를 집계하고 평균을 계산하여 별도의 CSV 파일로 저장하는 함수
 
-    Parameters:
     :param df: 정제된 데이터프레임
     :param csv_folder_path: CSV 파일들이 저장될 폴더 경로
     :param company_name: 기업명
@@ -93,6 +92,12 @@ def aggregate_and_save(df, csv_folder_path, company_name):
     print(f"[SUCCESS] aggregate_and_save: {aggregated_csv_file_path}")
 
 def run(company_name, source):
+    """
+    @description JSON 파일을 CSV 파일로 변환하는 함수
+
+    :param company_name: 기업 이름
+    :param source: news | naver
+    """
     script_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 
     json_folder_path = os.path.join(script_dir, 'data', 'processed_articles')
@@ -124,6 +129,6 @@ def run(company_name, source):
     aggregate_and_save(df, csv_folder_path, company_name)
 
 def test_json_to_csv():
-    run('Intel', 'news')
+    run('한화오션', 'naver')
 
 
