@@ -72,39 +72,39 @@ def predict_emotions(texts, model, tokenizer):
 
     return per_sentence_scores, aggregate_scores, max_label
 
-# def test_ko_sentiment():
-#     test_sentences = [
-#         "이곳에서 보낸 휴가는 정말 잊지 못할 만큼 행복하고 즐거웠다.",
-#         "이번 경험은 정말 끔찍했다. 서비스는 엉망이었고, 모든 것이 계획과 달랐다.",
-#         "회의는 평범했다. 특별히 인상적이지도, 불만스럽지도 않았다.",
-#         "오늘의 경험은 정말로 놀라웠어! 모든 게 완벽했고, 앞으로 다시 오고 싶어.",
-#         "이번 프로젝트는 매우 성공적이었어. 팀원 모두가 최선을 다해 협력했어.",
-#         "그 영화는 감동적이었고, 끝까지 눈을 뗄 수가 없었어.",
-#         "맛있는 음식을 먹고 좋은 사람들과 함께한 시간이 정말 소중했어.",
-#         "새로운 취미를 시작했는데 너무 재미있어서 시간이 어떻게 갔는지 몰랐어.",
-#         "서비스가 최악이었어. 두 번 다시 이용하고 싶지 않아.",
-#         "오늘 하루는 정말 최악이었어. 계획이 모두 엉망이 되었어.",
-#         "그 가게에서 산 물건이 금방 고장 나서 너무 실망스러웠어.",
-#         "지루하고 따분한 강의를 들어서 시간이 너무 더디게 갔어.",
-#         "음식이 차갑고 맛이 없어서 먹을 가치도 없었어.",
-#         "오늘의 날씨는 흐림이었다. 특별히 좋지도 나쁘지도 않았어.",
-#         "회의는 예정된 시간에 시작해서 필요한 내용을 논의하고 마쳤어.",
-#         "그는 가방을 들고 집을 나섰다. 별다른 사건은 없었어.",
-#         "점심으로 먹은 음식은 그냥 평범한 맛이었다.",
-#         "버스를 타고 목적지에 도착했어. 늦지도 일찍 도착하지도 않았어."
-#     ]
-#
-#     per_sentence_scores, aggregate_scores = predict_emotions(test_sentences, model, tokenizer)
-#
-#     # 각 문장별 결과 출력
-#     for item in per_sentence_scores:
-#         print(f"Text: {item['text']}")
-#         print(f"Sentiment Scores: {item['sentiment_scores']}\n")
-#
-#     # 종합 감정 점수 출력
-#     print("===== [Aggregate Sentiment Scores] =====")
-#     print(
-#         f"Negative: {aggregate_scores['negative']:.4f}, Neutral: {aggregate_scores['neutral']:.4f}, Positive: {aggregate_scores['positive']:.4f}\n")
+def test_ko_sentiment():
+    test_sentences = [
+        "이곳에서 보낸 휴가는 정말 잊지 못할 만큼 행복하고 즐거웠다.",
+        "이번 경험은 정말 끔찍했다. 서비스는 엉망이었고, 모든 것이 계획과 달랐다.",
+        "회의는 평범했다. 특별히 인상적이지도, 불만스럽지도 않았다.",
+        "오늘의 경험은 정말로 놀라웠어! 모든 게 완벽했고, 앞으로 다시 오고 싶어.",
+        "이번 프로젝트는 매우 성공적이었어. 팀원 모두가 최선을 다해 협력했어.",
+        "그 영화는 감동적이었고, 끝까지 눈을 뗄 수가 없었어.",
+        "맛있는 음식을 먹고 좋은 사람들과 함께한 시간이 정말 소중했어.",
+        "새로운 취미를 시작했는데 너무 재미있어서 시간이 어떻게 갔는지 몰랐어.",
+        "서비스가 최악이었어. 두 번 다시 이용하고 싶지 않아.",
+        "오늘 하루는 정말 최악이었어. 계획이 모두 엉망이 되었어.",
+        "그 가게에서 산 물건이 금방 고장 나서 너무 실망스러웠어.",
+        "지루하고 따분한 강의를 들어서 시간이 너무 더디게 갔어.",
+        "음식이 차갑고 맛이 없어서 먹을 가치도 없었어.",
+        "오늘의 날씨는 흐림이었다. 특별히 좋지도 나쁘지도 않았어.",
+        "회의는 예정된 시간에 시작해서 필요한 내용을 논의하고 마쳤어.",
+        "그는 가방을 들고 집을 나섰다. 별다른 사건은 없었어.",
+        "점심으로 먹은 음식은 그냥 평범한 맛이었다.",
+        "버스를 타고 목적지에 도착했어. 늦지도 일찍 도착하지도 않았어."
+    ]
+
+    per_sentence_scores, aggregate_scores = predict_emotions(test_sentences, model, tokenizer)
+
+    # 각 문장별 결과 출력
+    for item in per_sentence_scores:
+        print(f"Text: {item['text']}")
+        print(f"Sentiment Scores: {item['sentiment_scores']}\n")
+
+    # 종합 감정 점수 출력
+    print("===== [Aggregate Sentiment Scores] =====")
+    print(
+        f"Negative: {aggregate_scores['negative']:.4f}, Neutral: {aggregate_scores['neutral']:.4f}, Positive: {aggregate_scores['positive']:.4f}\n")
 
 
 ## TODO: 배치 처리 코드 추가
