@@ -46,7 +46,7 @@ def predict_emotions_en(texts):
 
 def test_en_sentiment():
     test_sentences = [
-        "The company's stock price increased by 5% after the announcement.",
+        "The company's stocks price increased by 5% after the announcement.",
         "There are concerns about the economic downturn affecting the market.",
         "New product launches have boosted investor confidence."
     ]

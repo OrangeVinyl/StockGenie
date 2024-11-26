@@ -3,7 +3,7 @@ from . import stock_ticker as scl
 from . import yfinance_reader as ya
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-SAVE_PATH = os.path.join(BASE_DIR, '../data/stock_dataset')
+SAVE_PATH = os.path.join(BASE_DIR, '../data/stocks')
 
 
 def decide_stock_market(market_type, company_name):

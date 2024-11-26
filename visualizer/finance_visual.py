@@ -14,7 +14,7 @@ def get_stock_csv_path(company_name):
     :param company_name:
     """
     csv_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-    stock_csv_folder_path = os.path.join(csv_dir, 'data', 'stock_dataset')
+    stock_csv_folder_path = os.path.join(csv_dir, 'data', 'stocks')
     stock_csv_data = os.path.join(stock_csv_folder_path, f"{company_name}_stock_dataset.csv")
     return stock_csv_data
 

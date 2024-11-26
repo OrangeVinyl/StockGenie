@@ -34,7 +34,7 @@ def get_stock_data(company_name):
 
     # CSV 저장
     csv_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-    stock_csv_folder_path = os.path.join(csv_dir, 'data', 'stock_dataset')
+    stock_csv_folder_path = os.path.join(csv_dir, 'data', 'stocks')
     os.makedirs(stock_csv_folder_path, exist_ok=True)
     stock_csv_data = os.path.join(stock_csv_folder_path, f"{company_name}_stock_dataset.csv")
     stock_df.to_csv(stock_csv_data, index=False)
