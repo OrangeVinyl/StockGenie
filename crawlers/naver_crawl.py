@@ -47,9 +47,14 @@ def get_post_data(post, json_result, cnt):
     publish_date = datetime.datetime.strptime(post['pubDate'], '%a, %d %b %Y %H:%M:%S +0900')
     publish_date = publish_date.strftime('%Y-%m-%d %H:%M:%S')
 
-    json_result.append({'cnt': cnt, 'title': title, 'description': description,
-                       'org_link': org_link, 'link': link, 'publish_date': publish_date})
-    return
+    json_result.append({
+        'cnt': cnt,
+        'title': title,
+        'description': description,
+        'org_link': org_link,
+        'link': link,
+        'publish_date': publish_date
+    })
 
 def get_news_content(link):
     try:
@@ -77,39 +82,37 @@ def filter_post(post, keyword, cutoff_date):
         return True
     return False
 
-def save_output(json_result, c_name):
+def save_output(json_result, company_name):
     base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     save_dir = os.path.join(base_dir, 'data', 'naver_articles')
 
     if not os.path.exists(save_dir):
         os.makedirs(save_dir)
+        print(f"INFO: 디렉토리 생성: {save_dir}")
 
-    save_path = os.path.join(save_dir, f'{c_name}_naver_articles.json')
+    save_path = os.path.join(save_dir, f'{company_name}_naver_articles.json')
 
-    with open(save_path, 'w', encoding='utf8') as outfile:
-        res = json.dumps(json_result, indent=4, sort_keys=True, ensure_ascii=False)
-        outfile.write(res)
+    try:
+        with open(save_path, 'w', encoding='utf8') as outfile:
+            res = json.dumps(json_result, indent=4, sort_keys=True, ensure_ascii=False)
+            outfile.write(res)
+        print(f'[SUCCESS] {company_name}_naver_articles.json SAVED')
+        print(f'[SUCCESS] {save_path} SAVED')
+    except Exception as e:
+        print(f"[ERROR] 파일 저장 중 오류 발생: {e}")
 
-    print('[SUCCESS] %s_naver_articles.json SAVED' % c_name)
-    print(f'[SUCCESS] {save_path} SAVED')
 
 def run(company_name):
-    # 기사 수집을 위한 변수 초기화
     today = datetime.datetime.now()
     one_week_ago = today - datetime.timedelta(days=limit_days)
 
     cnt = 0
     start = 1 # 검색 시작 위치 (1~1000)
     display = 100 # 검색 결과 출력 건수 (10~100)
-    total = 0 # 검색 결과 총 건수
 
     json_result = []
 
-    # 각 날짜별 기사 수를 저장할 딕셔너리 초기화
-    articles_per_day = {}
-    for i in range(limit_days):
-        day = (today - datetime.timedelta(days=i)).strftime('%Y-%m-%d')
-        articles_per_day[day] = 0
+    articles_per_day = {(today - datetime.timedelta(days=i)).strftime('%Y-%m-%d'): 0 for i in range(limit_days)}
 
     while True:
         json_response = get_naver_search(company_name, start, display)
@@ -117,9 +120,6 @@ def run(company_name):
         if json_response is None or json_response.get('display', 0) == 0:
             print("[WARN] 더 이상 가져올 기사가 없습니다.")
             break
-
-        if total == 0:
-            total = json_response.get('total', 0)
 
         items = json_response.get('items', [])
         if not items:
@@ -166,12 +166,10 @@ def run(company_name):
     save_output(json_result, company_name)
 
     print("\n===== [검색 결과] =====")
-    print("[INFO] 전체 검색 결과 : %d 건" % total)
     print("[INFO] 가져온 데이터 : %d 건" % cnt)
-    print("[INFO] 날짜별 기사 수 :")
+    print("[INFO] 날짜별 기사 수")
     for date_str, count in sorted(articles_per_day.items()):
         print(f"{date_str}: {count}건")
-
 
 def test_naver_crawl():
     run('삼성전자')

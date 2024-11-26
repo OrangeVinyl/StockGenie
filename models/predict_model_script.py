@@ -75,14 +75,16 @@ def run_predict_model(company_name, source):
     if X_predict.empty:
         print(f"No data available for the date: {last_available_date}")
     else:
-        # DMatrix 변환 시 feature_names 명시적 설정
         d_predict = xgb.DMatrix(X_predict, feature_names=features)
-
         predict_model = xgb.Booster()
+        model_path = ''
+
         if source == '해외':
-            predict_model.load_model('en_predict_model.json')
+            model_path = os.path.join(os.path.dirname(__file__), 'kor_pr_model_up.json')
         elif source == '국내':
-            predict_model.load_model('kor_pr_model_up.json')
+            model_path = os.path.join(os.path.dirname(__file__), 'kor_pr_model_up.json')
+
+        predict_model.load_model(model_path)
 
         # 다음 날 종가 예측
         predicted_price = predict_model.predict(d_predict)

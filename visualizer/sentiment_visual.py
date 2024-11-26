@@ -6,7 +6,6 @@ from collections import Counter
 import matplotlib.pyplot as plt
 import plotly.graph_objects as go
 
-
 def load_data(company_name):
     """
     @description 데이터를 로드하는 함수
@@ -66,7 +65,6 @@ def daily_sentiment_visualize(df):
     )
 
     fig.show()
-
 
 def main_sentiment_visualize(df):
     """
@@ -146,6 +144,16 @@ def word_cloud_visualize(df):
     plt.title('Word Cloud of Summaries')
     plt.show()
 
+def run_sentiment_visual(company_name):
+    try:
+        full_df, aggregated_df = load_data(company_name)
+    except FileNotFoundError:
+        print("데이터 로드에 실패했습니다.")
+        return
+
+    daily_sentiment_visualize(aggregated_df)
+    main_sentiment_visualize(aggregated_df)
+    word_cloud_visualize(full_df)
 
 def test_sentiment_visual():
     company_name = '한화오션'

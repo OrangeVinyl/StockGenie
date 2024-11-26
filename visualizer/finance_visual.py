@@ -6,7 +6,6 @@ import matplotlib.pyplot as plt
 import plotly.graph_objects as go
 from datetime import datetime, timedelta
 
-
 def get_stock_csv_path(company_name):
     """
     @description 지정된 회사 이름에 해당하는 CSV 파일의 경로를 반환하는 함수
@@ -109,11 +108,16 @@ def visualize_finance_mplfinance(company_name):
              volume=True,
              mav=(3, 6, 9))  # 이동 평균선 추가 (선택 사항)
 
+def run_finance_visual(company_name):
+    visualize_finance(company_name)
+    visualize_finance_mplfinance(company_name)
+    visualize_finance_interactive_line(company_name)
+    visualize_finance_interactive_candlestick(company_name)
 
 def test_finance_visual():
     company_name = '한화오션'
 
     visualize_finance(company_name)
+    visualize_finance_mplfinance(company_name)
     visualize_finance_interactive_line(company_name)
     visualize_finance_interactive_candlestick(company_name)
-    visualize_finance_mplfinance(company_name)

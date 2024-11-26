@@ -5,7 +5,6 @@ from . import yfinance_reader as ya
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 SAVE_PATH = os.path.join(BASE_DIR, '../data/stocks')
 
-
 def decide_stock_market(market_type, company_name):
     if market_type == '국내':
         stock_code, market = scl.get_domestic_stock_code(company_name)

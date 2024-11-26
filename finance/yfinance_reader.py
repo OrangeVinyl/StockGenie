@@ -3,20 +3,16 @@ import yfinance as yf
 from datetime import datetime, timedelta
 
 def get_stock_history(stock_code, period="1y"):
+    """
+    @description yfinance를 사용하여 주가 데이터를 가져오는 함수
+
+    :param stock_code: ticker
+    :param period: str - 기간 (default: 1y)
+    :return: finance data
+    """
     ticker = yf.Ticker(stock_code)
-    hist = ticker.history(period=period)
-    return hist
-
-def print_recent_data(stock_code, days=20):
-    hist = get_stock_history(stock_code)
-    if not hist.empty:
-        print(f"{stock_code}의 최근 {days}일간 주가 데이터:")
-        print(hist.tail(days))
-    else:
-        print(f"{stock_code}에 대한 데이터를 가져올 수 없습니다.")
-
-    return hist
-
+    data = ticker.history(period=period)
+    return data
 
 def get_stock_data(company_name):
     """
@@ -32,7 +28,6 @@ def get_stock_data(company_name):
     stock_df = ticker.history(start=start_date, end=end_date)
     stock_df.reset_index(inplace=True)
 
-    # CSV 저장
     csv_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
     stock_csv_folder_path = os.path.join(csv_dir, 'data', 'stocks')
     os.makedirs(stock_csv_folder_path, exist_ok=True)
@@ -40,3 +35,21 @@ def get_stock_data(company_name):
     stock_df.to_csv(stock_csv_data, index=False)
 
     return stock_df
+
+
+def print_recent_data(stock_code, days=20):
+    """
+    @description 최근 주가 데이터를 출력하는 함수
+
+    :param stock_code:
+    :param days:
+    :return:
+    """
+    data = get_stock_history(stock_code)
+    if not data.empty:
+        print(f"{stock_code}의 최근 {days}일간 주가 데이터:")
+        print(data.tail(days))
+    else:
+        print(f"{stock_code}에 대한 데이터를 가져올 수 없습니다.")
+
+    return data

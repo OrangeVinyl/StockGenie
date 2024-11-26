@@ -2,6 +2,7 @@ import os
 import json
 import requests
 import datetime
+from newspaper import Article
 from dotenv import load_dotenv
 from trafilatura import fetch_url, extract
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -9,7 +10,20 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 load_dotenv()
 API_KEY = os.getenv("NEWS_API_KEY")
 
+limit_days = 7
+
 def get_news_search(api_key, query, from_date, to_date, page=1, page_size=100):
+    """
+    @description: 뉴스 검색 API를 이용하여 뉴스를 검색하는 함수
+
+    :param api_key:
+    :param query:
+    :param from_date:
+    :param to_date:
+    :param page: int - 페이지 번호(default: 1)
+    :param page_size: int - 한 페이지에 출력할 결과 수(max: 100)
+    :return: data | None - API 응답 데이터
+    """
     url = 'https://newsapi.org/v2/everything'
     params = {
         'q': query,
@@ -34,22 +48,30 @@ def get_news_search(api_key, query, from_date, to_date, page=1, page_size=100):
         return data
 
     except requests.exceptions.HTTPError as http_err:
-        print(f"[ERROR] HTTP error: {http_err}")
+        print(f"[ERROR] HTTP ERROR: {http_err}")
 
     except Exception as e:
-        print(f"[ERROR] News API request failure: {e}")
+        print(f"[ERROR] News API request ERROR: {e}")
 
     return None
 
 def parse_article(url, language='en'):
+    """
+    @description: 주어진 URL의 기사를 파싱하여 본문을 추출하는 함수
+    - newspaper3k를 이용하여 본문 추출 시도
+    - 실패할 경우 trafilatura를 이용하여 본문 추출 시도
+
+    :param url:
+    :param language: str - 언어(default: en)
+    :return: text | None
+    """
     try:
-        from newspaper import Article
         article = Article(url, language=language)
         article.download()
         article.parse()
         return article.text
     except Exception as e:
-        print(f"[WARN] Failed newspaper3k ({url}): {e}")
+        print(f"[INFO] Failed newspaper3k ({url}): {e}")
 
     try:
         downloaded = fetch_url(url)
@@ -59,10 +81,18 @@ def parse_article(url, language='en'):
         text = extract(downloaded, include_comments=False, include_tables=False)
         return text
     except Exception as e:
-        print(f"[ERROR] Failed trafilatura ({url}): {e}")
+        print(f"[INFO] Failed trafilatura ({url}): {e}")
         return None
 
 def filter_article(article, query, cutoff_date):
+    """
+    @description: 기사를 필터링하는 함수
+
+    :param article:
+    :param query:
+    :param cutoff_date:
+    :return: bool
+    """
     title = (article.get('title') or '').lower()
     description = (article.get('description') or '').lower()
     published_at = article.get('publishedAt', '') or ''
@@ -76,6 +106,12 @@ def filter_article(article, query, cutoff_date):
     return False
 
 def save_to_json(data, company_name):
+    """
+    @description: JSON 파일로 저장하는 함수
+
+    :param data:
+    :param company_name:
+    """
     base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     save_dir = os.path.join(base_dir, 'data', 'news_articles')
 
@@ -92,15 +128,14 @@ def save_to_json(data, company_name):
     print(f'[SUCCESS] {save_path} SAVED')
 
 def run(company_name):
-    cnt = 1
-    max_articles = 210  # 최대 기사 수
-    min_articles = 20  # 최소 기사 수
-    limit_days = 7  # 가져올 날짜 수
-
     today = datetime.datetime.now()
     days_ago = today - datetime.timedelta(days=limit_days)
     json_result = []
+
+    cnt = 1
     total_results = 0
+    min_articles = 20  # 최소 기사 수
+    max_articles = 210  # 최대 기사 수
 
     dates_with_articles = set()
     date_range = {(days_ago + datetime.timedelta(days=i)).strftime('%Y-%m-%d') for i in range(limit_days)}
@@ -169,4 +204,3 @@ def run(company_name):
 
 def test_news_crawl():
     run('nvidia')
-    # run('tesla')
