@@ -1,7 +1,9 @@
 import os
 import time
+import json
 import psutil
 import summarizer
+import pandas as pd
 import streamlit as st
 from PIL import Image
 from util import json_to_csv
@@ -19,6 +21,7 @@ DATA_DIR = "data"
 PROCESSED_DIR = os.path.join(DATA_DIR, "processed_articles")
 NAVER_DIR = os.path.join(DATA_DIR, "naver_articles")
 NEWS_DIR = os.path.join(DATA_DIR, "news_articles")
+CSV_DIR = os.path.join(DATA_DIR, "csv_datasets")
 
 VALID_SOURCES = {
     '국내': ('naver_crawl', NAVER_DIR, 'naver'),
@@ -75,6 +78,23 @@ def summarize_articles(input_dir: str, output_dir: str, company_name: str, sourc
     print("\n===== [기사 요약] =====")
     summarizer.run(input_dir, output_dir, company_name, source)
 
+
+def summarize_articles_df(output_dir: str, company_name: str) -> Optional[pd.DataFrame]:
+    summary_file = os.path.join(output_dir, f"{company_name}_summaries.json")
+
+    if not os.path.exists(summary_file):
+        st.warning(f"요약 파일을 찾을 수 없습니다: {summary_file}", icon="⚠️")
+        return None
+
+    with open(summary_file, 'r', encoding='utf-8') as f:
+        summaries = json.load(f)
+
+    df = pd.DataFrame(summaries)
+    if 'summary' not in df.columns or 'publish_date' not in df.columns:
+        st.warning("요약 데이터에 'summary' 또는 'publish_date' 컬럼이 없습니다.", icon="⚠️")
+        return None
+
+    return df[['summary', 'publish_date']]
 
 def main():
     # 페이지 설정
@@ -184,11 +204,16 @@ def main():
     tabs = st.tabs(["📄 요약된 기사", "📊 감성 분석", "📈 주식 분석", "🔮 예측 모델"])
     with tabs[0]:
         st.header("📄 요약된 기사")
-        # num_articles = st.slider("표시할 기사 수", min_value=1, max_value=20, value=5)
+        if company_name and os.path.exists(os.path.join(CSV_DIR, f"{company_name}_datasets.csv")):
+            summary_df = summarize_articles_df(CSV_DIR, company_name)
+            if summary_df is not None and not summary_df.empty:
+                st.dataframe(summary_df)
+        else:
+            st.warning("요약된 기사가 없습니다. 먼저 프로세스를 실행해주세요.", icon="⚠️")
 
     with tabs[1]:
         st.header("📊 감성 분석 결과")
-        if company_name and os.path.exists(os.path.join(DATA_DIR, 'csv_datasets', f"{company_name}_datasets.csv")):
+        if company_name and os.path.exists(os.path.join(CSV_DIR, f"{company_name}_datasets.csv")):
             fig1, fig2, fig3, fig4 = run_sentiment_visual(company_name)
             if fig1 and fig2 and fig3 and fig4:
                 st.plotly_chart(fig1, use_container_width=True)

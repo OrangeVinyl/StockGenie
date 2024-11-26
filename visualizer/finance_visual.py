@@ -11,6 +11,7 @@ def get_stock_csv_path(company_name):
     @description 지정된 회사 이름에 해당하는 CSV 파일의 경로를 반환하는 함수
 
     :param company_name:
+    :return stock_csv_data: str
     """
     csv_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
     stock_csv_folder_path = os.path.join(csv_dir, 'data', 'stocks')
@@ -23,6 +24,7 @@ def load_stock_data(company_name):
     @description 지정된 회사의 CSV 파일을 읽어 DataFrame으로 반환하는 함수
 
     :param company_name:
+    :return stock_df: pd.DataFrame
     """
     stock_csv_data = get_stock_csv_path(company_name)
     stock_df = pd.read_csv(stock_csv_data, parse_dates=['Date'])
@@ -34,16 +36,19 @@ def visualize_finance(company_name):
     @description Pandas의 기본 플롯을 사용한 종가 추이 시각화 함수
 
     :param company_name:
+    :return fig: plt.Figure
     """
     stock_df = load_stock_data(company_name)
-    plt.figure(figsize=(10, 5))
-    plt.plot(stock_df['Date'], stock_df['Close'], label='Close')
-    plt.title(f"{company_name} Close Price")
-    plt.xlabel('Date')
-    plt.ylabel('Price')
-    plt.legend()
-    plt.grid(True)
-    plt.show()
+
+    fig, ax = plt.subplots(figsize=(10, 5))
+    ax.plot(stock_df['Date'], stock_df['Close'], label='Close')
+    ax.set_title(f"{company_name} Close Price")
+    ax.set_xlabel('Date')
+    ax.set_ylabel('Price')
+    ax.legend()
+    ax.grid(True)
+
+    return fig
 
 
 def visualize_finance_interactive_line(company_name):
@@ -51,11 +56,13 @@ def visualize_finance_interactive_line(company_name):
     @description Plotly를 사용한 인터랙티브 종가 추이 시각화 함수
 
     :param company_name:
+    :return fig: go.Figure
     """
     stock_df = load_stock_data(company_name)
     fig = px.line(stock_df, x='Date', y='Close', title=f"{company_name} Close Price")
     fig.update_layout(xaxis_title='Date', yaxis_title='Price')
-    fig.show()
+
+    return fig
 
 
 def visualize_finance_interactive_candlestick(company_name):
@@ -63,6 +70,7 @@ def visualize_finance_interactive_candlestick(company_name):
     @description Plotly를 사용한 인터랙티브 캔들스틱 차트 시각화 함수
 
     :param company_name:
+    :return fig: go.Figure
     """
     stock_df = load_stock_data(company_name)
     fig = go.Figure(data=[go.Candlestick(
@@ -80,7 +88,8 @@ def visualize_finance_interactive_candlestick(company_name):
         yaxis_title='Price',
         xaxis_rangeslider_visible=False
     )
-    fig.show()
+
+    return fig
 
 
 def visualize_finance_mplfinance(company_name):
@@ -88,6 +97,7 @@ def visualize_finance_mplfinance(company_name):
     @description mplfinance를 사용하여 한 달치 주가 추이 및 캔들스틱 차트를 시각화하는 함수
 
     :param company_name:
+    :return fig: plt.Figure
     """
     stock_df = load_stock_data(company_name)
 
@@ -102,17 +112,21 @@ def visualize_finance_mplfinance(company_name):
     )
     s = mpf.make_mpf_style(marketcolors=mc)
 
-    mpf.plot(one_month_df, type='candle', style=s,
-             title="Monthly Candlestick Chart",
-             ylabel='price',
-             volume=True,
-             mav=(3, 6, 9))  # 이동 평균선 추가 (선택 사항)
+    fig, axlist = mpf.plot(one_month_df, type='candle', style=s,
+                           title="Monthly Candlestick Chart",
+                           ylabel='price',
+                           volume=True,
+                           mav=(3, 6, 9),
+                           returnfig=True)
+    return fig
 
 def run_finance_visual(company_name):
-    visualize_finance(company_name)
-    visualize_finance_mplfinance(company_name)
-    visualize_finance_interactive_line(company_name)
-    visualize_finance_interactive_candlestick(company_name)
+    fig1 = visualize_finance(company_name)
+    fig2 = visualize_finance_mplfinance(company_name)
+    fig3 = visualize_finance_interactive_line(company_name)
+    fig4 = visualize_finance_interactive_candlestick(company_name)
+
+    return fig1, fig2, fig3, fig4
 
 def test_finance_visual():
     company_name = '한화오션'

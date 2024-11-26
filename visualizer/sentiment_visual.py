@@ -11,7 +11,7 @@ def load_data(company_name):
     @description 데이터를 로드하는 함수
 
     :param company_name:
-    :return:
+    :return full_df, aggregated_df: pd.DataFrame, pd.DataFrame
     """
     base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'data', 'csv_datasets'))
     full_csv = os.path.join(base_dir, f"{company_name}_datasets.csv")
@@ -33,6 +33,7 @@ def daily_sentiment_visualize(df):
     - Plotly를 사용한 인터랙티브한 선 그래프
 
     :param df: 'publish_date', 'positive', 'neutral', 'negative' 컬럼을 포함한 데이터프레임
+    :return fig: go.Figure
     """
     fig = go.Figure()
 
@@ -64,7 +65,7 @@ def daily_sentiment_visualize(df):
         legend=dict(bordercolor='Black', borderwidth=1)
     )
 
-    fig.show()
+    return fig
 
 def main_sentiment_visualize(df):
     """
@@ -72,6 +73,7 @@ def main_sentiment_visualize(df):
     - Plotly를 사용한 스택형 막대 그래프
 
     :param df: 'publish_date', 'positive', 'neutral', 'negative' 컬럼을 포함한 데이터프레임
+    :return fig: go.Figure
     """
     fig = go.Figure()
 
@@ -98,7 +100,7 @@ def main_sentiment_visualize(df):
         template='plotly_white'
     )
 
-    fig.show()
+    return fig
 
 
 def word_cloud_visualize(df):
@@ -121,13 +123,12 @@ def word_cloud_visualize(df):
 
     ## 상위 20개 단워 막대 그래프 생성
     words, counts = zip(*most_common_words)
-    plt.figure(figsize=(10, 6))
-    plt.bar(words, counts, color='skyblue')
-    plt.title('Top 20 Most Common Words in Summaries')
-    plt.ylabel('Frequency')
-    plt.xticks(rotation=45, ha='right')
+    fig, ax = plt.subplots(figsize=(10, 6))
+    ax.bar(words, counts, color='skyblue')
+    ax.set_title('Top 20 Most Common Words in Summaries')
+    ax.set_ylabel('Frequency')
+    ax.set_xticklabels(words, rotation=45, ha='right')
     plt.tight_layout()
-    plt.show()
 
 
     if font_path and os.path.exists(font_path):
@@ -136,13 +137,14 @@ def word_cloud_visualize(df):
         wc = WordCloud(width=800, height=400, background_color='white')
         print("경고: 지정된 폰트를 찾을 수 없어 기본 폰트를 사용합니다.")
 
-    ## wordcloud 생성 및 시각화
     wordcloud = wc.generate_from_frequencies(word_counts)
-    plt.figure(figsize=(10, 6))
-    plt.imshow(wordcloud, interpolation='bilinear')
-    plt.axis('off')
-    plt.title('Word Cloud of Summaries')
-    plt.show()
+
+    fig_wc, ax_wc = plt.subplots(figsize=(10, 6))
+    ax_wc.imshow(wordcloud, interpolation='bilinear')
+    ax_wc.axis('off')
+    ax_wc.set_title('Word Cloud of Summaries')
+
+    return fig, fig_wc
 
 def run_sentiment_visual(company_name):
     try:
@@ -151,9 +153,11 @@ def run_sentiment_visual(company_name):
         print("데이터 로드에 실패했습니다.")
         return
 
-    daily_sentiment_visualize(aggregated_df)
-    main_sentiment_visualize(aggregated_df)
-    word_cloud_visualize(full_df)
+    fig1 = daily_sentiment_visualize(aggregated_df)
+    fig2 = main_sentiment_visualize(aggregated_df)
+    fig3, fig4 = word_cloud_visualize(full_df)
+
+    return fig1, fig2, fig3, fig4
 
 def test_sentiment_visual():
     company_name = '한화오션'

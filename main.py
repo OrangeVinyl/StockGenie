@@ -12,6 +12,10 @@ from visualizer.finance_visual import run_finance_visual
 from models.predict_model_script import run_predict_model
 from visualizer.sentiment_visual import run_sentiment_visual
 
+"""
+CMD에서 실행하는 메인 프로그램
+"""
+
 DATA_DIR = "data"
 PROCESSED_DIR = os.path.join(DATA_DIR, "processed_articles")
 NAVER_DIR = os.path.join(DATA_DIR, "naver_articles")
