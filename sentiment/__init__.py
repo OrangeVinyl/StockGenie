@@ -1,6 +1,5 @@
 import os
 import json
-from transformers import AutoTokenizer, AutoModelForSequenceClassification
 from sentiment.ko_sentiment import predict_emotions, tokenizer, model
 from sentiment.en_sentiment import predict_emotions_en
 

@@ -1,9 +1,11 @@
+import torch
 from transformers import pipeline
 
 pipe = pipeline(
     "text-classification",
     model="mrm8488/distilroberta-finetuned-financial-news-sentiment-analysis",
-    top_k=None
+    top_k=None,
+    device = 0 if torch.cuda.is_available() else -1
 )
 
 def predict_emotions_en(texts):
