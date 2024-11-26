@@ -167,6 +167,6 @@ def run(company_name):
     print(f"[INFO] 수집된 데이터: {len(json_result)} 건\n")
 
 
-def test_news_craw():
+def test_news_crawl():
     run('nvidia')
     # run('tesla')
