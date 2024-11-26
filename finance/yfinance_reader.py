@@ -20,8 +20,8 @@ def print_recent_data(stock_code, days=20):
 
 def get_stock_data(company_name):
     """
-    @description finance를 사용하여 주가 데이터를 가져와 CSV로 저장하고 DataFrame으로 반환합니다.
-    데이터는 1년치 데이터를 기준으로 합니다.
+    @description finance를 사용하여 주가 데이터를 가져와 CSV로 저장하고 DataFrame으로 반환하는 함수
+    - 데이터는 1년치 데이터를 기준
 
     :param company_name:
     """

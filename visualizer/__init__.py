@@ -3,7 +3,6 @@ import matplotlib.pyplot as plt
 import matplotlib.font_manager as fm
 from util.check_platform import get_os
 
-
 font_path = None
 
 if get_os() == 'Windows':

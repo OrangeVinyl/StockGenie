@@ -2,9 +2,9 @@ import os
 import json
 from soynlp.normalizer import repeat_normalize
 
-from preprocessing.cleaner import clean_punc, clean_text, punct, punct_mapping
 from preprocessing.spacing import correct_spacing
 from preprocessing.splitter import split_sentences, split_sentences_en
+from preprocessing.cleaner import clean_punc, clean_text, punct, punct_mapping
 
 
 def preprocess_ko(lines):
@@ -32,13 +32,11 @@ def preprocess_en(lines):
 def preprocess_json(source, dir_path, company_name):
     """
     @description 지정된 디렉토리 내의 모든 JSON 파일을 읽고, 각 파일의 'summary' 필드를 전처리하여
-    'pre_processed_summary' 키로 저장
+    'pre_processed_summary' 키로 저장하는 함수
 
     :param source: str - '국내' 또는 '해외'
     :param dir_path: str - JSON 파일들이 저장된 디렉토리 경로
     :param company_name: str - 회사명
-
-    :return None
     """
     print("==============================[전처리]==============================")
     company_name_lower = company_name.lower()

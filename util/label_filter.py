@@ -1,8 +1,8 @@
-import pandas as pd
 import chardet
+import pandas as pd
 
 """
-@description: 7가지 감정을 3가지로 변환하는 필터링 함수 | 일회성 코드
+@description: 7가지 감정을 3가지로 변환하는 필터링 스크립트
 
 kykim/bert-kor-base 모델을 미세조정 하기 위해
 rating_csv 파일의 내용을 읽어 mapped_emotion_dataset.csv 파일을 생성

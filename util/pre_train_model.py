@@ -1,26 +1,37 @@
-import pandas as pd
 import torch
+import warnings
+import numpy as np
+import pandas as pd
 from torch.utils.data import Dataset
-from transformers import AutoTokenizer, AutoModelForSequenceClassification, Trainer, TrainingArguments
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, precision_recall_fscore_support
-import numpy as np
-import warnings
+from transformers import AutoTokenizer, AutoModelForSequenceClassification, Trainer, TrainingArguments
 
 """
-@description: 한국어 감정 분석 모델 학습 | 일회성 코드
+@description: 한국어 감정 분석 모델을 학습하는 스크립트
+
+1. 데이터 로드
+2. 라벨 인코딩
+3. 데이터 분할
+4. 토크나이저 로드
+5. 데이터셋 클래스 정의
+6. 데이터셋 생성
+7. 모델 로드
+8. 평가 지표 함수 정의
+9. 훈련 인자 설정
+10. Trainer 초기화
+11. 모델 학습
+12. 평가
+13. 모델 저장
 """
 
 warnings.filterwarnings("ignore", category=FutureWarning)
 
-# 1. 데이터 로드
 df = pd.read_csv('../data/mapped_emotion_dataset.csv', encoding='utf-8')
 
-# 2. 라벨 인코딩
 label_mapping = {'negative': 0, 'neutral': 1, 'positive': 2}
 df['label'] = df['label'].map(label_mapping)
 
-# 3. 데이터 분할
 train_texts, test_texts, train_labels, test_labels = train_test_split(
     df['words'].tolist(),
     df['label'].tolist(),
@@ -28,12 +39,8 @@ train_texts, test_texts, train_labels, test_labels = train_test_split(
     random_state=42,
     stratify=df['label']
 )
-
-# 4. 토크나이저 로드
 tokenizer = AutoTokenizer.from_pretrained("kykim/bert-kor-base", trust_remote_code=True)
 
-
-# 5. 데이터셋 클래스 정의
 class EmotionDataset(Dataset):
     def __init__(self, texts, labels, tokenizer, max_length=128):
         self.texts = texts
@@ -61,19 +68,15 @@ class EmotionDataset(Dataset):
         return item
 
 
-# 6. 데이터셋 생성
 train_dataset = EmotionDataset(train_texts, train_labels, tokenizer)
 test_dataset = EmotionDataset(test_texts, test_labels, tokenizer)
 
-# 7. 모델 로드
 model = AutoModelForSequenceClassification.from_pretrained(
     "kykim/bert-kor-base",
     num_labels=3,  # negative, neutral, positive
     # problem_type="multi_label_classification"
 )
 
-
-# 8. 평가 지표 함수 정의
 def compute_metrics(pred):
     labels = pred.label_ids
     preds = np.argmax(pred.predictions, axis=1)
@@ -86,8 +89,6 @@ def compute_metrics(pred):
         'recall': recall
     }
 
-
-# 9. 훈련 인자 설정
 training_args = TrainingArguments(
     output_dir='../results',
     num_train_epochs=3,
@@ -104,7 +105,6 @@ training_args = TrainingArguments(
     greater_is_better=True
 )
 
-# 10. Trainer 초기화
 trainer = Trainer(
     model=model,
     args=training_args,
@@ -114,16 +114,11 @@ trainer = Trainer(
     compute_metrics=compute_metrics
 )
 
-# 11. 모델 학습
 trainer.train()
 
-# 12. 평가
 eval_results = trainer.evaluate()
 print(f"Evaluation results: {eval_results}")
 
-# 13. 모델 저장
 model_save_path = '../models/kobert_emotion_classifier'
 trainer.save_model(model_save_path)
 tokenizer.save_pretrained(model_save_path)
-
-print(f"모델이 {model_save_path}에 저장되었습니다.")

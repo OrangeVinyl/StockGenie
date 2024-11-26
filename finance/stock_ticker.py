@@ -1,7 +1,7 @@
-import FinanceDataReader as fdr
-import pandas as pd
-import difflib
 import re
+import difflib
+import pandas as pd
+import FinanceDataReader as fdr
 
 df_krx = None
 df_us = None

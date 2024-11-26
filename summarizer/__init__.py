@@ -1,15 +1,15 @@
 import os
 import json
-
-from langchain_core.prompts import PromptTemplate
 from tqdm import tqdm
+from .prompts import CUSTOM_PROMPT, EN_CUSTOM_PROMPT
+
 from langchain_openai import ChatOpenAI
+from langchain.globals import set_llm_cache
+from langchain.docstore.document import Document
+from langchain_core.prompts import PromptTemplate
+from langchain_community.cache import InMemoryCache
 from langchain.chains.summarize import load_summarize_chain
 from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain.docstore.document import Document
-from langchain.globals import set_llm_cache
-from langchain_community.cache import InMemoryCache
-from .prompts import CUSTOM_PROMPT, EN_CUSTOM_PROMPT
 
 def load_articles(input_dir, company_name, source):
     """
