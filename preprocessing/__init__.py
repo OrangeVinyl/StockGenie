@@ -1,7 +1,6 @@
 import os
 import json
 from soynlp.normalizer import repeat_normalize
-
 from preprocessing.spacing import correct_spacing
 from preprocessing.splitter import split_sentences, split_sentences_en
 from preprocessing.cleaner import clean_punc, clean_text, punct, punct_mapping
@@ -9,20 +8,14 @@ from preprocessing.cleaner import clean_punc, clean_text, punct, punct_mapping
 
 def preprocess_ko(lines):
     normalized_lines = [repeat_normalize(line, num_repeats=2) for line in lines]
-
     spaced_lines = correct_spacing(normalized_lines)
     splits = split_sentences(spaced_lines)
     clean_sentences = clean_text(splits)
-
-    ## 형태소 분석 -- ML/DL 모델에 따라 사용
-    # processed_sentences = [extract_relevant_words(sentence) for sentence in clean_sentences]
-    # print("Processed Sentences:", processed_sentences)
 
     return clean_sentences
 
 def preprocess_en(lines):
     clean_punc_lines = [clean_punc(line, punct, punct_mapping) for line in lines]
-    #cleaned_lines = [clean_text([line])[0] for line in cleaned_lines]1
     splits = split_sentences_en(clean_punc_lines)
     clean_sentences = clean_text(splits)
 
