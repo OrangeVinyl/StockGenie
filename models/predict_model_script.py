@@ -104,15 +104,6 @@ def run_predict_model(company_name, source):
             print(f"No data available for the date: {last_available_date}")
             return None
         else:
-            recent_close_price = recent_7_days_data['Close'].iloc[-1]
-            price_change_percentage = ((predicted_price[0] - recent_close_price) / recent_close_price) * 100
-
-            # 감성 점수 평균
-            sentiment_avg = recent_7_days_data['sentiment_score'].mean()
-
-            # 거래량 평균
-            volume_avg = recent_7_days_data['Volume'].mean()
-
             # 기존 그래프 생성 코드
             plt.figure(figsize=(12, 6))
             plt.plot(combined_data['Date'][:-1], combined_data['Close'][:-1],
@@ -127,12 +118,30 @@ def run_predict_model(company_name, source):
             plt.legend()
             plt.tight_layout()
 
+            # 최근 종가 및 거래량
+            recent_close_price = recent_7_days_data['Close'].iloc[-1]
+
+            # 이전 7일의 종가 평균 및 거래량 평균
+            prev_7_days_data = new_data[new_data['Date'] <= last_available_date - timedelta(days=7)]
+            if not prev_7_days_data.empty:
+                prev_close_avg = prev_7_days_data['Close'].mean()
+                prev_volume_avg = prev_7_days_data['Volume'].mean()
+            else:
+                prev_close_avg = recent_close_price
+                prev_volume_avg = recent_7_days_data['Volume'].mean()
+
+            # 변화율 계산
+            close_price_change_percentage = ((recent_close_price - prev_close_avg) / prev_close_avg) * 100
+            volume_change_percentage = ((recent_7_days_data['Volume'].mean() - prev_volume_avg) / prev_volume_avg) * 100
+            predicted_price_change_percentage = ((predicted_price[0] - recent_close_price) / recent_close_price) * 100
+
             return plt, {
             "recent_close_price": recent_close_price,
+            "close_price_change_percentage": close_price_change_percentage,
+            "volume_avg": recent_7_days_data['Volume'].mean(),
+            "volume_change_percentage": volume_change_percentage,
             "predicted_price": predicted_price[0],
-            "price_change_percentage": price_change_percentage,
-            "sentiment_avg": sentiment_avg,
-            "volume_avg": volume_avg
+            "predicted_price_change_percentage": predicted_price_change_percentage
         }
 
 def test_predict_model():

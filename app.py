@@ -118,6 +118,7 @@ def main():
     st.markdown("---")
     # 사이드바에 입력 정보 배치
     st.sidebar.header("📥 입력 정보")
+    st.sidebar.info("국내 기업의 경우, 상장된 기업명을 입력해주세요.\n 해외 기업의 경우, 기업명을 입력해주세요.")
     source = st.sidebar.selectbox('시장 유형을 선택하세요', ['국내', '해외'])
     company_name = st.sidebar.text_input("기업 이름을 입력하세요")
 
@@ -194,11 +195,13 @@ def main():
                 run_finance_visual(company_name)
                 st.success("시각화가 완료되었습니다.", icon="✅")
                 step += 1
+
             except Exception as e:
                 st.error(f"[ERROR]: 처리 중 오류 발생: {e}", icon="❌")
             finally:
                 measure_performance(start_cpu_times, start_wall, process.cpu_times(), time.time())
                 progress_bar.empty()
+                status_text.text("🎉 프로세스 완료")
                 st.success("프로세스가 성공적으로 완료되었습니다!", icon="✅")
 
 
@@ -252,21 +255,23 @@ def main():
             prediction_result, prediction_data = run_predict_model(company_name, source)
 
             if prediction_data:
-                st.pyplot(prediction_result)  # 그래프 표시
+                st.pyplot(prediction_result)
 
                 st.markdown("---")
                 col1, col2, col3 = st.columns(3)
 
-                # 각 열에 데이터를 배치
-                col1.metric(label="최근 종가", value=f"{prediction_data['recent_close_price']:.0f}")
-                col2.metric(label="최근 7일 거래량 평균", value=f"{prediction_data['volume_avg']:.0f}")
+                col1.metric(label="최근 종가", value=f"{prediction_data['recent_close_price']:.0f}",
+                          delta=f"{prediction_data['close_price_change_percentage']:.0f}%")
+                col2.metric(label="최근 7일 거래량 평균", value=f"{prediction_data['volume_avg']:.0f}",
+                            delta=f"{prediction_data['volume_change_percentage']:.0f}%")
                 col3.metric(label="예측된 종가", value=f"{prediction_data['predicted_price']:.0f}",
-                            delta=f"{prediction_data['price_change_percentage']:.0f}%")
+                            delta=f"{prediction_data['predicted_price_change_percentage']:.0f}%")
 
                 style_metric_cards()
             else:
                 st.warning("예측 모델 결과를 표시할 데이터가 없습니다. 데이터를 확인하거나 입력을 다시 시도해주세요.", icon="⚠️")
-        st.warning("예측 결과가 여기에 표시됩니다.", icon="🔰")
+        else:
+            st.warning("예측 결과가 여기에 표시됩니다.", icon="🔰")
 
     # 푸터 추가
     st.markdown("""

@@ -66,7 +66,10 @@ def summarize_article(content, chain):
     :return:+
     """
     if not content:
-        return "[WARN] 요약할 내용이 없습니다."
+        return ''
+
+    if len(content) < 100:
+        return ''
 
     ## Split Text
     text_splitter = RecursiveCharacterTextSplitter(

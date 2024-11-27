@@ -115,6 +115,10 @@ def run(company_name, source):
         all_extracted_data.extend(extracted)
 
     df = pd.DataFrame(all_extracted_data)
+
+    # content가 비어있는 행 제거
+    df = df[df['content'] != '']
+
     df['publish_date'] = pd.to_datetime(df['publish_date'], errors='coerce')
     df['publish_date'] = df['publish_date'].dt.strftime('%Y-%m-%d')
 
