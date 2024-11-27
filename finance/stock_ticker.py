@@ -67,6 +67,12 @@ def load_us_stock_listing():
         return pd.DataFrame()
 
 def get_domestic_stock_code(company_name):
+    """
+    @description: 국내 시장의 주식 코드를 찾는 함수
+
+    :param company_name:
+    :return:
+    """
     df_krx = load_stock_listing('KRX')
     if df_krx.empty:
         print("[WARN] KRX 시장의 데이터를 불러오는 데 실패했습니다.")
@@ -82,6 +88,12 @@ def get_domestic_stock_code(company_name):
         return None, None
 
 def get_us_stock_code(company_name):
+    """
+    @description: 미국 시장의 주식 코드를 찾는 함수
+
+    :param company_name:
+    :return:
+    """
     df_us = load_us_stock_listing()
     if df_us.empty:
         print("[WARN] 미국 시장의 데이터를 불러오는 데 실패했습니다.")

@@ -43,7 +43,7 @@ def load_articles(input_dir, company_name, source):
 
 def save_articles(articles, output_dir, company_name, source):
     """
-    @description:
+    @description: 요약된 기사를 저장하는 함수
 
     :param articles:
     :param output_dir:
@@ -59,11 +59,11 @@ def save_articles(articles, output_dir, company_name, source):
 
 def summarize_article(content, chain):
     """
-    @description:
+    @description: 기사 내용을 요약하는 함수
 
     :param content:
     :param chain:
-    :return:+
+    :return: summary
     """
     if not content:
         return ''
@@ -85,7 +85,11 @@ def summarize_article(content, chain):
 
 def clean_source_files(input_dir, company_name, source):
     """
-    @description 각 소스 디렉토리에서 처리된 JSON 파일을 제거합니다.
+    @description 각 소스 디렉토리에서 처리된 JSON 파일을 제거하는 함수
+
+    :param input_dir:
+    :param company_name:
+    :param source:
     """
     if source == 'naver':
         file_pattern = f"{company_name}_naver_articles"
