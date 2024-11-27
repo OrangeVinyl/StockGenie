@@ -102,14 +102,100 @@
     ```
     
 
+**ENV(Keys)**
+
+```
+## Naver API
+NAVER_CLIENT=
+NAVER_SECRET=
+
+## Google API
+GOOGLE_API_KEY=
+
+## OpenAI API
+OPENAI_API_KEY=
+
+## LangSmith API
+LANGCHAIN_TRACING_V2=true
+LANGCHAIN_ENDPOINT=https://api.smith.langchain.com
+LANGCHAIN_API_KEY=
+LANGCHAIN_PROJECT=StockGenie
+
+## News API
+NEWS_API_KEY=
+```
+
 **의존성 및 라이브러리 설치**
 
 ```
 > pip install -r requirements.txt
 ```
-
 **애플리케이션 구동**
 
 ```
 > streamlit run app.py
+```
+
+## 📦 Directory
+
+---
+
+```angular2html
+📦 StockGeine
+├─.gitignore
+├─ README.md
+├─ app.py
+├─ crawlers
+│  ├─ __init__.py
+│  ├─ naver_crawl.py
+│  ├─ news_crawl.py
+├─ data
+│  ├─ csv_datasets
+│  ├─ naver_article
+│  ├─ news_article
+│  ├─ plot
+│  ├─ processed_article
+│  ├─ stock
+│  ├─ mapped_emotion_dataset.csv
+│  └─ stopwords.txt
+├─ finance
+│  ├─ __init__.py
+│  ├─ finance_reader.py
+│  ├─ stock_ticker.py
+│  └─ yfinance_reader.py
+├─ logs
+├─ main.py
+├─ model
+│  ├─ __init__.py
+│  ├─ en_predict_model.json
+│  ├─ predict_model_script.py
+│  ├─ kor_predict_model.jso
+│  ├─ make_predict_model.ipynb
+│  └─ train_more_data_and_run.ipyn
+├─ preprocessing
+│  ├─ __init__.py
+│  ├─ cleaner.py
+│  ├─ morphological.py
+│  ├─ spacing.py
+│  └─ splitter.py
+├─ requirements.txt
+├─ sentiment
+│  ├─ __init__.py
+│  ├─ en_sentiment.py
+│  └─ ko_sentiment.py
+├─ summarizer
+│  ├─ __init__.py
+│  └─ prompts.py
+├─ util
+│  ├─ __init__.py
+│  ├─ check_platform.py
+│  ├─ json_to_csv.py
+│  ├─ label_filter.py
+│  ├─ logger.py
+│  └─ pre_train_model.py
+└─ visualize
+   ├─ __init__.py
+   ├─ finance_visual.py
+   └─ sentiment_visual.py
+
 ```
