@@ -100,27 +100,40 @@ def run_predict_model(company_name, source):
         # 최근 7일 데이터에 예측 데이터 추가
         combined_data = pd.concat([recent_7_days_data[['Date', 'Close']], future_data], ignore_index=True)
 
-        # 시각화 - 실제 주가와 예측된 주가
-        plt.figure(figsize=(12, 6))
+        if X_predict.empty:
+            print(f"No data available for the date: {last_available_date}")
+            return None
+        else:
+            recent_close_price = recent_7_days_data['Close'].iloc[-1]
+            price_change_percentage = ((predicted_price[0] - recent_close_price) / recent_close_price) * 100
 
-        # 최근 7일간의 실제 주가
-        plt.plot(combined_data['Date'][:-1], combined_data['Close'][:-1], label='Actual Close Price (Last 7 Days)', color='blue', marker='o', linestyle='-', alpha=0.7)
+            # 감성 점수 평균
+            sentiment_avg = recent_7_days_data['sentiment_score'].mean()
 
-        # 예측된 다음 날 주가
-        plt.plot(combined_data['Date'][-2:], combined_data['Close'][-2:], label='Predicted Next Day Close Price', color='red', linestyle='--', marker='x', markersize=10)
+            # 거래량 평균
+            volume_avg = recent_7_days_data['Volume'].mean()
 
-        # 그래프 장식
-        plt.title('Stock Price: Last 7 Days and Predicted Next Day')
-        plt.xlabel('Date')
-        plt.ylabel('Stock Price')
-        plt.xticks(rotation=45)
-        plt.grid(visible=True)
-        plt.legend()
-        plt.tight_layout()
+            # 기존 그래프 생성 코드
+            plt.figure(figsize=(12, 6))
+            plt.plot(combined_data['Date'][:-1], combined_data['Close'][:-1],
+                     label='Actual Close Price (Last 7 Days)', color='blue', marker='o', linestyle='-', alpha=0.7)
+            plt.plot(combined_data['Date'][-2:], combined_data['Close'][-2:],
+                     label='Predicted Next Day Close Price', color='red', linestyle='--', marker='x', markersize=10)
+            plt.title('Stock Price: Last 7 Days and Predicted Next Day')
+            plt.xlabel('Date')
+            plt.ylabel('Stock Price')
+            plt.xticks(rotation=45)
+            plt.grid(visible=True)
+            plt.legend()
+            plt.tight_layout()
 
-        # 그래프 표시
-        plt.show()
-
+            return plt, {
+            "recent_close_price": recent_close_price,
+            "predicted_price": predicted_price[0],
+            "price_change_percentage": price_change_percentage,
+            "sentiment_avg": sentiment_avg,
+            "volume_avg": volume_avg
+        }
 
 def test_predict_model():
-    run_predict_model('한화오션', '국내')
+    p_graph = run_predict_model('한화오션', '국내')
