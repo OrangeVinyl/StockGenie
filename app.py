@@ -198,6 +198,7 @@ def main():
 
             except Exception as e:
                 st.error(f"[ERROR]: 처리 중 오류 발생: {e}", icon="❌")
+                st.stop()
             finally:
                 measure_performance(start_cpu_times, start_wall, process.cpu_times(), time.time())
                 progress_bar.empty()
