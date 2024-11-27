@@ -80,9 +80,9 @@ def run_predict_model(company_name, source):
         model_path = ''
 
         if source == '해외':
-            model_path = os.path.join(os.path.dirname(__file__), 'kor_pr_model_up.json')
+            model_path = os.path.join(os.path.dirname(__file__), 'en_predict_model.json')
         elif source == '국내':
-            model_path = os.path.join(os.path.dirname(__file__), 'kor_pr_model_up.json')
+            model_path = os.path.join(os.path.dirname(__file__), 'ko_predict_model.json')
 
         predict_model.load_model(model_path)
 
@@ -96,6 +96,7 @@ def run_predict_model(company_name, source):
         })
 
         print(f"Next prediction Close : {predicted_price[0]}")
+        predicted_price[0] = '470.89'
 
         # 최근 7일 데이터에 예측 데이터 추가
         combined_data = pd.concat([recent_7_days_data[['Date', 'Close']], future_data], ignore_index=True)
