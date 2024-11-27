@@ -28,25 +28,25 @@ def extract_data_from_json(json_file_path):
 
     extracted = []
     for article in articles:
+        if 'content' != '':
+            title = article.get('title', '')
+            summary = article.get('summary', '')
+            publish_date = article.get('publish_date', '')
 
-        title = article.get('title', '')
-        summary = article.get('summary', '')
-        publish_date = article.get('publish_date', '')
+            # aggregate_scores에서 감성 점수 추출
+            aggregate_scores = article.get('aggregate_scores', {})
+            positive = aggregate_scores.get('positive', 0.0)
+            neutral = aggregate_scores.get('neutral', 0.0)
+            negative = aggregate_scores.get('negative', 0.0)
 
-        # aggregate_scores에서 감성 점수 추출
-        aggregate_scores = article.get('aggregate_scores', {})
-        positive = aggregate_scores.get('positive', 0.0)
-        neutral = aggregate_scores.get('neutral', 0.0)
-        negative = aggregate_scores.get('negative', 0.0)
-
-        extracted.append({
-            'title': title,
-            'summary': summary,
-            'publish_date': publish_date,
-            'positive': positive,
-            'neutral': neutral,
-            'negative': negative
-        })
+            extracted.append({
+                'title': title,
+                'summary': summary,
+                'publish_date': publish_date,
+                'positive': positive,
+                'neutral': neutral,
+                'negative': negative
+            })
     return extracted
 
 
@@ -115,9 +115,6 @@ def run(company_name, source):
         all_extracted_data.extend(extracted)
 
     df = pd.DataFrame(all_extracted_data)
-
-    # content가 비어있는 행 제거
-    df = df[df['content'] != '']
 
     df['publish_date'] = pd.to_datetime(df['publish_date'], errors='coerce')
     df['publish_date'] = df['publish_date'].dt.strftime('%Y-%m-%d')

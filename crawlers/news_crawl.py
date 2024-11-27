@@ -194,8 +194,6 @@ def run(company_name):
 
     if len(json_result) >= min_articles and date_range.issubset(dates_with_articles):
         print("[INFO] 조건 충족: 최소 20개의 기사와 각 날짜별로 최소 1개의 기사 수집 완료.")
-    else:
-        print("[WARN] 조건 미충족: 최소 기사 수 또는 날짜별 기사 수집이 완료되지 않았습니다.")
 
     print("\n===== [검색 결과] =====")
     print(f"[INFO] 전체 검색 결과: {total_results} 건")
