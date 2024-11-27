@@ -5,6 +5,7 @@ from wordcloud import WordCloud
 from collections import Counter
 import matplotlib.pyplot as plt
 import plotly.graph_objects as go
+from preprocessing.morphological import extract_relevant_words_ko, extract_relevant_words_en
 
 def load_data(company_name):
     """
@@ -103,26 +104,30 @@ def main_sentiment_visualize(df):
     return fig
 
 
-def word_cloud_visualize(df):
+def word_cloud_visualize(df, source):
     """
     @description 요약 내용의 단어 빈도수를 기반으로 시각화하는 함수
     - 막대 그래프와 워드 클라우드를 활용
 
     :param df: 전체 데이터프레임
+    :param source: str - '국내' 또는 '해외'
     """
     summaries = df['summary'].dropna().astype(str)
 
-    all_text = ' '.join(summaries)
-    words = all_text.split()
-
-    # TODO: 형태소 분석 추가 (한국어 텍스트 처리 시 필요)
+    all_words = []
+    for text in summaries:
+        if source == '국내':
+            words = extract_relevant_words_ko(text)
+        elif source == '해외':
+            words = extract_relevant_words_en(text)
+        all_words.extend(words)
 
     # 단어 빈도수 계산
-    word_counts = Counter(words)
+    word_counts = Counter(all_words)
     most_common_words = word_counts.most_common(20)
 
     ## 상위 20개 단워 막대 그래프 생성
-    words, counts = zip(*most_common_words)
+    words, counts = zip(*most_common_words) if most_common_words else ([], [])
     fig, ax = plt.subplots(figsize=(10, 6))
     ax.bar(words, counts, color='skyblue')
     ax.set_title('Top 20 Most Common Words in Summaries')
@@ -144,9 +149,12 @@ def word_cloud_visualize(df):
     ax_wc.axis('off')
     ax_wc.set_title('Word Cloud of Summaries')
 
+    fig.show()
+    fig_wc.show()
+
     return fig, fig_wc
 
-def run_sentiment_visual(company_name):
+def run_sentiment_visual(company_name, source):
     try:
         full_df, aggregated_df = load_data(company_name)
     except FileNotFoundError:
@@ -155,12 +163,13 @@ def run_sentiment_visual(company_name):
 
     fig1 = daily_sentiment_visualize(aggregated_df)
     fig2 = main_sentiment_visualize(aggregated_df)
-    fig3, fig4 = word_cloud_visualize(full_df)
+    fig3, fig4 = word_cloud_visualize(full_df, source)
 
     return fig1, fig2, fig3, fig4
 
 def test_sentiment_visual():
     company_name = '한화오션'
+    source = '국내'
 
     try:
         full_df, aggregated_df = load_data(company_name)
@@ -168,8 +177,8 @@ def test_sentiment_visual():
         print("데이터 로드에 실패했습니다.")
         return
 
-    daily_sentiment_visualize(aggregated_df)
-    main_sentiment_visualize(aggregated_df)
-    word_cloud_visualize(full_df)
+    fig1 = daily_sentiment_visualize(aggregated_df)
+    fig2 = main_sentiment_visualize(aggregated_df)
+    fig3, fig4 = word_cloud_visualize(full_df, source)
 
     print(aggregated_df.head())
